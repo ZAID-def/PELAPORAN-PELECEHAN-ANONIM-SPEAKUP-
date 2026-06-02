@@ -39,4 +39,19 @@ class AdminUserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Admin berhasil ditambahkan.');
     }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'role' => 'required|in:admin,super_admin',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update(['role' => $request->role]);
+
+        return redirect()->route('admin.users.index')->with('success', 'Peran user berhasil diperbarui.');
+    }
 }
