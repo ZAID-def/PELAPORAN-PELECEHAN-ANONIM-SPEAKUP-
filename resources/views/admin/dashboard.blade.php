@@ -93,6 +93,7 @@
                             <tbody class="divide-y divide-gray-200">
                                 @forelse($laporans as $laporan)
                                 <tr class="hover:bg-gray-50 transition">
+                                    
                                     <td class="px-8 py-4 whitespace-nowrap">
                                         <span class="text-sm font-medium text-indigo-600">
                                             {{ $laporan->kode_tracking }}
@@ -148,8 +149,9 @@
                                         <div class="flex items-center gap-2">
                                             <!-- Edit Notes -->
                                             <button type="button"
-                                                onclick="openNoteModal({{ $laporan->id_laporan }}, @json($laporan->notes))"
-                                                class="text-yellow-600 hover:text-yellow-900 transition"
+                                                class="edit-note-btn text-yellow-600 hover:text-yellow-900 transition"
+                                                data-report-id="{{ $laporan->id_laporan }}"
+                                                data-notes="{{ $laporan->notes ?? '' }}"
                                                 title="Edit Notes">
                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                     class="h-5 w-5"
@@ -187,15 +189,37 @@
                                                         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                 </svg>
                                             </button>
+
+                                            <!-- Delete -->
+                                            <form action="{{ route('admin.reports.destroy', $laporan->id_laporan) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus laporan ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900 transition" title="Hapus Laporan">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        class="h-5 w-5"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor">
+                                                        <path stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
+
                                 </tr>
+
                                 @empty
+
                                 <tr>
                                     <td colspan="6" class="px-8 py-12 text-center text-gray-500">
                                         Tidak ada laporan masuk
                                     </td>
                                 </tr>
+
                                 @endforelse
                             </tbody>
                         </table>
@@ -266,7 +290,9 @@
 
     <!-- Note Modal -->
     <div id="noteModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
         <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4">
+
             <div class="px-8 py-6 border-b border-gray-200 flex items-center justify-between">
                 <h3 class="text-xl font-bold text-gray-900">
                     Catatan / Alasan Penolakan
@@ -275,11 +301,13 @@
                 <button type="button"
                     onclick="closeNoteModal()"
                     class="text-gray-500 hover:text-gray-700">
+
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-6 w-6"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor">
+
                         <path stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
@@ -289,6 +317,7 @@
             </div>
 
             <form id="noteForm" method="POST" class="px-8 py-6 space-y-4">
+
                 @csrf
                 @method('PUT')
 
@@ -306,23 +335,29 @@
                 </div>
 
                 <div class="flex items-center justify-between gap-4">
+
                     <button type="button"
                         onclick="deleteNote()"
                         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+
                         Hapus Catatan
                     </button>
 
                     <div class="flex gap-2">
+
                         <button type="button"
                             onclick="closeNoteModal()"
                             class="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400 transition">
+
                             Batal
                         </button>
 
                         <button type="submit"
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+
                             Simpan Catatan
                         </button>
+
                     </div>
                 </div>
             </form>
@@ -335,6 +370,17 @@
             return document.querySelector('meta[name="csrf-token"]')?.content || 
                    document.querySelector('input[name="_token"]')?.value;
         }
+
+        // Setup event listeners for edit note buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.edit-note-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const reportId = this.getAttribute('data-report-id');
+                    const notes = this.getAttribute('data-notes');
+                    openNoteModal(reportId, notes);
+                });
+            });
+        });
 
         // Detail Modal Functions
         function showDetail(id) {
@@ -350,17 +396,17 @@
                     document.getElementById('detailNotes').textContent = data.notes || 'Tidak ada catatan';
                     
                     let statusColor = 'bg-gray-100 text-gray-800';
-                    if (data.status === 'Menunggu Verifikasi') statusColor = 'bg-yellow-100 text-yellow-800';
-                    else if (data.status === 'Diproses') statusColor = 'bg-blue-100 text-blue-800';
-                    else if (data.status === 'Selesai') statusColor = 'bg-green-100 text-green-800';
-                    else if (data.status === 'Ditolak') statusColor = 'bg-red-100 text-red-800';
+                    if(data.status === 'Menunggu Verifikasi') statusColor = 'bg-yellow-100 text-yellow-800';
+                    else if(data.status === 'Diproses') statusColor = 'bg-blue-100 text-blue-800';
+                    else if(data.status === 'Selesai') statusColor = 'bg-green-100 text-green-800';
+                    else if(data.status === 'Ditolak') statusColor = 'bg-red-100 text-red-800';
                     
                     document.getElementById('detailStatus').innerHTML = `<span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor}">${data.status}</span>`;
                     
                     // Tampilkan bukti
                     const buktiContainer = document.getElementById('buktiContainer');
                     buktiContainer.innerHTML = '';
-                    if (data.buktis && data.buktis.length > 0) {
+                    if(data.buktis && data.buktis.length > 0) {
                         document.getElementById('detailBukti').classList.remove('hidden');
                         data.buktis.forEach(bukti => {
                             const img = document.createElement('img');
@@ -396,6 +442,7 @@
 
         function closeNoteModal() {
             document.getElementById('noteModal').classList.add('hidden');
+            document.getElementById('noteForm').reset();
         }
 
         function deleteNote() {
@@ -411,27 +458,70 @@
                 return;
             }
 
-            const csrfToken = getCsrfToken();
-            const deleteForm = document.createElement('form');
-            deleteForm.method = 'POST';
-            deleteForm.action = `/admin/reports/${reportId}/notes`;
-
-            deleteForm.innerHTML = `
-                <input type="hidden" name="_token" value="${csrfToken}">
-                <input type="hidden" name="_method" value="DELETE">
-            `;
-
-            document.body.appendChild(deleteForm);
-            deleteForm.submit();
+            fetch(`/admin/reports/${reportId}/notes`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-Token': getCsrfToken(),
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    closeNoteModal();
+                    location.reload();
+                } else {
+                    alert('Error: Gagal menghapus catatan');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: Gagal menghapus catatan');
+            });
         }
+
+        // Handle Note Form Submission
+        document.getElementById('noteForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const formData = new FormData(form);
+            const noteTextarea = document.getElementById('notes');
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': getCsrfToken(),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        notes: noteTextarea.value,
+                        _method: 'PUT'
+                    })
+                });
+
+                if (response.ok) {
+                    // Close modal
+                    closeNoteModal();
+                    // Reload page to show updated data
+                    location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert('Error: ' + (errorData.message || 'Gagal menyimpan catatan'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: Gagal menyimpan catatan');
+            }
+        });
 
         // Click outside modal to close
         document.getElementById('detailModal')?.addEventListener('click', function(e) {
-            if (e.target === this) closeDetail();
+            if(e.target === this) closeDetail();
         });
 
         document.getElementById('noteModal')?.addEventListener('click', function(e) {
-            if (e.target === this) closeNoteModal();
+            if(e.target === this) closeNoteModal();
         });
 
         // Auto-hide modals after page refresh

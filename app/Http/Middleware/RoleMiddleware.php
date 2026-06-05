@@ -17,7 +17,7 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, $role): Response
     {
         if (!Auth::check()) {
-            return redirect('/login');
+            return redirect()->route('admin.login');
         }
 
         $allowedRoles = array_map('trim', explode(',', $role));

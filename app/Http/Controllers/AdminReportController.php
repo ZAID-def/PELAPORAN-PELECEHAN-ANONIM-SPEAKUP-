@@ -83,6 +83,14 @@ class AdminReportController extends Controller
             'notes' => $request->notes
         ]);
 
+        // Check if request is AJAX/JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Catatan laporan berhasil disimpan.'
+            ]);
+        }
+
         return redirect()->route('admin.dashboard')
             ->with('success', 'Catatan laporan berhasil disimpan.');
     }
@@ -98,6 +106,14 @@ class AdminReportController extends Controller
         $laporan->update([
             'notes' => null
         ]);
+
+        // Check if request is AJAX/JSON
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Catatan laporan berhasil dihapus.'
+            ]);
+        }
 
         return redirect()->route('admin.dashboard')
             ->with('success', 'Catatan laporan berhasil dihapus.');
