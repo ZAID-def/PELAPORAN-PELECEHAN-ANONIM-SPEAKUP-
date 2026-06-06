@@ -143,6 +143,7 @@
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Deskripsi</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Status</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">Tanggal Dibuat</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -182,10 +183,33 @@
                                     <td class="px-6 py-4 text-sm text-gray-500">
                                         {{ $kategori->created_at->format('d M Y') }}
                                     </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-center gap-2">
+                                            {{-- Tombol Edit --}}
+                                            <a href="{{ route('admin.kategori.edit', $kategori->id) }}"
+                                               title="Edit"
+                                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 transition text-xs font-semibold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                Edit
+                                            </a>
+                                            {{-- Tombol Delete --}}
+                                            <button
+                                               onclick="confirmDelete({{ $kategori->id }}, '{{ addslashes($kategori->nama_kategori) }}')"
+                                               title="Hapus"
+                                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition text-xs font-semibold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                Hapus
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="px-8 py-16 text-center">
+                                    <td colspan="6" class="px-8 py-16 text-center">
                                         <div class="flex flex-col items-center gap-3 text-gray-400">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
@@ -248,3 +272,56 @@
     </div>
 </body>
 </html>
+
+{{-- Modal Konfirmasi Hapus --}}
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 overflow-hidden">
+        <div class="bg-red-50 px-6 py-5 border-b border-red-100 flex items-center gap-3">
+            <div class="bg-red-100 rounded-full p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-gray-900">Konfirmasi Hapus</h3>
+                <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan</p>
+            </div>
+        </div>
+        <div class="px-6 py-5">
+            <p class="text-sm text-gray-700">Apakah Anda yakin ingin menghapus kategori:</p>
+            <p class="mt-1 text-base font-bold text-gray-900" id="deleteKategoriName"></p>
+            <p class="mt-3 text-xs text-red-600 bg-red-50 rounded-lg p-3 border border-red-100">
+                ⚠️ Data yang sudah dihapus tidak dapat dikembalikan.
+            </p>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3">
+            <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition text-sm font-medium">
+                Batal
+            </button>
+            <form id="deleteForm" method="POST">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition text-sm font-semibold">
+                    Ya, Hapus
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete(id, nama) {
+        document.getElementById('deleteKategoriName').textContent = '"' + nama + '"';
+        document.getElementById('deleteForm').action = '/admin/kategori/' + id;
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    // Tutup modal saat klik backdrop
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+</script>
