@@ -76,18 +76,60 @@
 
                 <div>
                     <label for="bukti" class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti</label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-md p-4 text-center hover:border-indigo-500 transition-colors">
-                        <input type="file" name="bukti" id="bukti" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="updateFileName(this)">
-                        <label for="bukti" class="cursor-pointer">
-                            <div class="text-gray-500">
-                                <svg class="mx-auto h-12 w-12 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-indigo-500 hover:bg-indigo-50/30 transition-all duration-300 relative">
+                        <input type="file" name="bukti" id="bukti" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="handleFileSelect(this)">
+
+                        <!-- Estado inicial: zona de upload -->
+                        <label for="bukti" id="upload-placeholder" class="cursor-pointer block">
+                            <div class="text-gray-400">
+                                <svg class="mx-auto h-12 w-12 mb-3" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                                 </svg>
-                                <p>Klik untuk upload bukti</p>
-                                <p class="text-sm">Format: JPG, PNG, PDF. Maksimal 2MB</p>
+                                <p class="text-gray-600 font-medium">Klik untuk upload bukti</p>
+                                <p class="text-sm text-gray-400 mt-1">Format: JPG, PNG, PDF. Maksimal 2MB</p>
                             </div>
                         </label>
-                        <div id="file-name" class="mt-2 text-sm text-indigo-600 hidden"></div>
+
+                        <!-- Estado con archivo: preview card -->
+                        <div id="file-preview" class="hidden">
+                            <div class="flex items-center gap-4 bg-white border border-gray-200 rounded-lg p-3 shadow-sm text-left">
+                                <!-- Thumbnail / Ikon -->
+                                <div id="file-thumbnail" class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200">
+                                    <!-- Diisi oleh JavaScript -->
+                                </div>
+
+                                <!-- Info File -->
+                                <div class="flex-1 min-w-0">
+                                    <p id="file-display-name" class="text-sm font-semibold text-gray-800 truncate" title=""></p>
+                                    <p class="text-xs text-gray-500 mt-0.5">
+                                        <span id="file-type-badge" class="inline-block bg-indigo-100 text-indigo-700 font-semibold px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide"></span>
+                                        <span class="mx-1 text-gray-300">•</span>
+                                        <span id="file-size-display" class="text-gray-500"></span>
+                                    </p>
+                                    <label for="bukti" class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer mt-1 font-medium transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"/></svg>
+                                        Ganti file
+                                    </label>
+                                </div>
+
+                                <!-- Tombol Hapus -->
+                                <button type="button" onclick="removeFile()" class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-all duration-200" title="Hapus file">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Error message -->
+                        <div id="file-error" class="hidden mt-3">
+                            <div class="inline-flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span id="file-error-text"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -99,17 +141,141 @@
     </div>
 
     <script>
-        function updateFileName(input) {
-            const fileName = document.getElementById('file-name');
-            if (input.files && input.files[0]) {
-                fileName.textContent = 'File dipilih: ' + input.files[0].name;
-                fileName.classList.remove('hidden');
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+        const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function getFileExtension(name) {
+            return name.split('.').pop().toUpperCase();
+        }
+
+        function handleFileSelect(input) {
+            const errorEl = document.getElementById('file-error');
+            const errorText = document.getElementById('file-error-text');
+            const placeholder = document.getElementById('upload-placeholder');
+            const preview = document.getElementById('file-preview');
+            const uploadArea = document.getElementById('upload-area');
+
+            // Sembunyikan error sebelumnya
+            errorEl.classList.add('hidden');
+
+            if (!input.files || !input.files[0]) {
+                return;
+            }
+
+            const file = input.files[0];
+
+            // Validasi tipe file
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                showError('Format file tidak didukung. Gunakan JPG, PNG, atau PDF.');
+                input.value = '';
+                return;
+            }
+
+            // Validasi ukuran file
+            if (file.size > MAX_SIZE) {
+                showError('Ukuran file terlalu besar. Maksimal 2MB (file Anda: ' + formatFileSize(file.size) + ').');
+                input.value = '';
+                return;
+            }
+
+            // Tampilkan preview
+            showPreview(file);
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('file-error');
+            const errorText = document.getElementById('file-error-text');
+            const placeholder = document.getElementById('upload-placeholder');
+            const preview = document.getElementById('file-preview');
+
+            errorText.textContent = message;
+            errorEl.classList.remove('hidden');
+            placeholder.classList.remove('hidden');
+            preview.classList.add('hidden');
+        }
+
+        function showPreview(file) {
+            const placeholder = document.getElementById('upload-placeholder');
+            const preview = document.getElementById('file-preview');
+            const thumbnail = document.getElementById('file-thumbnail');
+            const nameEl = document.getElementById('file-display-name');
+            const typeEl = document.getElementById('file-type-badge');
+            const sizeEl = document.getElementById('file-size-display');
+            const uploadArea = document.getElementById('upload-area');
+            const errorEl = document.getElementById('file-error');
+
+            // Sembunyikan placeholder & error, tampilkan preview
+            placeholder.classList.add('hidden');
+            errorEl.classList.add('hidden');
+            preview.classList.remove('hidden');
+
+            // Update border style saat file ada
+            uploadArea.classList.remove('border-dashed', 'border-gray-300');
+            uploadArea.classList.add('border-solid', 'border-indigo-200', 'bg-indigo-50/20');
+
+            // Nama file
+            nameEl.textContent = file.name;
+            nameEl.title = file.name;
+
+            // Tipe file
+            const ext = getFileExtension(file.name);
+            typeEl.textContent = ext;
+
+            // Ukuran file
+            sizeEl.textContent = formatFileSize(file.size);
+
+            // Thumbnail
+            thumbnail.innerHTML = '';
+            if (file.type.startsWith('image/')) {
+                // Gambar: tampilkan thumbnail
+                const img = document.createElement('img');
+                img.classList.add('w-full', 'h-full', 'object-cover');
+                img.alt = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                thumbnail.appendChild(img);
             } else {
-                fileName.classList.add('hidden');
+                // PDF: tampilkan ikon
+                thumbnail.innerHTML = `
+                    <div class="flex flex-col items-center justify-center w-full h-full bg-red-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9l-5-5H7a2 2 0 00-2 2v13a2 2 0 002 2z"/>
+                            <polyline points="13 3 13 9 19 9" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="text-[9px] font-bold text-red-500 mt-0.5">PDF</span>
+                    </div>
+                `;
             }
         }
+
+        function removeFile() {
+            const input = document.getElementById('bukti');
+            const placeholder = document.getElementById('upload-placeholder');
+            const preview = document.getElementById('file-preview');
+            const uploadArea = document.getElementById('upload-area');
+            const errorEl = document.getElementById('file-error');
+
+            // Reset input file
+            input.value = '';
+
+            // Kembalikan tampilan ke kondisi awal
+            placeholder.classList.remove('hidden');
+            preview.classList.add('hidden');
+            errorEl.classList.add('hidden');
+
+            // Kembalikan border style
+            uploadArea.classList.add('border-dashed', 'border-gray-300');
+            uploadArea.classList.remove('border-solid', 'border-indigo-200', 'bg-indigo-50/20');
+        }
     </script>
-</body>
-</html>
 </body>
 </html>
