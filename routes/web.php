@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminBuktiController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ChatController;
@@ -34,6 +35,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/admin/reports/{id}/status', [AdminReportController::class, 'updateStatus'])->name('admin.reports.updateStatus');
     Route::delete('/admin/reports/{id}', [AdminReportController::class, 'destroy'])->name('admin.reports.destroy');
     Route::get('/admin/reports/{id}/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
+
+    // PBI #45, #46, #47 - Manajemen Bukti Fisik (Admin)
+    Route::get('/admin/bukti', [AdminBuktiController::class, 'index'])->name('admin.bukti.index');
+    Route::get('/admin/bukti/create', [AdminBuktiController::class, 'create'])->name('admin.bukti.create');
+    Route::post('/admin/bukti', [AdminBuktiController::class, 'store'])->name('admin.bukti.store');
+    Route::get('/admin/bukti/{id}/edit', [AdminBuktiController::class, 'edit'])->name('admin.bukti.edit');
+    Route::put('/admin/bukti/{id}', [AdminBuktiController::class, 'update'])->name('admin.bukti.update');
+    Route::patch('/admin/bukti/{id}/archive', [AdminBuktiController::class, 'archive'])->name('admin.bukti.archive');
+    Route::delete('/admin/bukti/{id}', [AdminBuktiController::class, 'destroy'])->name('admin.bukti.destroy');
 });
 
 Route::get('/chat/messages', [ChatController::class, 'getMessages'])->name('chat.getMessages');

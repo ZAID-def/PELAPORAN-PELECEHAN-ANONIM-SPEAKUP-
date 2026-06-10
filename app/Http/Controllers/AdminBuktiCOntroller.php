@@ -35,7 +35,7 @@ class AdminBuktiController extends Controller
 
         $buktis = $query->latest()->paginate(15)->withQueryString();
 
-        return view('admin.bukti.index', compact('buktis'));
+        return view('admin.bukti', compact('buktis'));
     }
 
     /**
@@ -44,7 +44,7 @@ class AdminBuktiController extends Controller
     public function create()
     {
         $laporans = Laporan::select('id_laporan', 'kode_tracking', 'jenis_kejadian')->get();
-        return view('admin.bukti.create', compact('laporans'));
+        return view('admin.createBukti', compact('laporans'));
     }
 
     /**
@@ -97,7 +97,7 @@ class AdminBuktiController extends Controller
     {
         $bukti    = Bukti::with('laporan')->findOrFail($id);
         $laporans = Laporan::select('id_laporan', 'kode_tracking', 'jenis_kejadian')->get();
-        return view('admin.bukti.edit', compact('bukti', 'laporans'));
+        return view('admin.editBukti', compact('bukti', 'laporans'));
     }
 
     /**

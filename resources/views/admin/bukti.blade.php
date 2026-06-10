@@ -183,8 +183,19 @@
                                                 </svg>
                                             </a>
  
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <!-- Edit (PBI #47) -->
+                                            <a href="{{ route('admin.bukti.edit', $bukti->id_bukti) }}"
+                                                class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Perbarui Status & Lokasi Bukti">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </a>
+
                                             @if(Auth::user()->role === 'super_admin')
-                                            <!-- Arsipkan (PBI #48) -->
+                                            <!-- Arsipkan placeholder -->
                                             @if(!in_array($bukti->status_bukti, ['Dimusnahkan','Dikembalikan']))
                                             <button onclick="showArchiveModal({{ $bukti->id_bukti }})"
                                                 class="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition" title="Arsipkan Bukti">
@@ -193,3 +204,76 @@
                                                 </svg>
                                             </button>
                                             @endif
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            </svg>
+                                            <p class="text-sm font-medium">Belum ada data bukti fisik</p>
+                                            <p class="text-xs mt-1">Silakan tambahkan bukti baru atau sesuaikan filter.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if($buktis->hasPages())
+                    <div class="px-6 py-4 border-t bg-gray-50">
+                        {{ $buktis->links() }}
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Archive Modal -->
+    <div id="archiveModal" onclick="if (event.target.id === 'archiveModal') hideArchiveModal()" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+        <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="px-6 py-4 border-b flex items-center justify-between bg-gray-50">
+                <h3 class="font-semibold text-gray-900">Arsipkan Bukti Fisik</h3>
+                <button onclick="hideArchiveModal()" class="text-2xl leading-none text-gray-400 hover:text-gray-600">×</button>
+            </div>
+            <form id="archiveForm" method="POST" class="p-6 space-y-5">
+                @csrf
+                <input type="hidden" name="_method" value="PATCH">
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1.5">Status Akhir</label>
+                    <select name="status_bukti" class="w-full rounded-xl border-gray-200 px-4 py-2.5 text-sm" required>
+                        <option value="Dikembalikan">Dikembalikan</option>
+                        <option value="Dimusnahkan">Dimusnahkan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1.5">Catatan</label>
+                    <textarea name="catatan" class="w-full rounded-xl border-gray-200 px-4 py-2.5 text-sm" rows="3" placeholder="Catatan pengarsipan..."></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="hideArchiveModal()" class="flex-1 py-3 rounded-xl border text-sm font-medium hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-orange-600 text-white text-sm font-medium hover:bg-orange-700">Arsipkan Sekarang</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showArchiveModal(id) {
+            const modal = document.getElementById('archiveModal');
+            const form = document.getElementById('archiveForm');
+            form.action = '/admin/bukti/' + id + '/archive';
+            modal.style.display = 'flex';
+        }
+        function hideArchiveModal() {
+            document.getElementById('archiveModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
