@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bukti;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class AdminBuktiController extends Controller

@@ -6,85 +6,121 @@
     <title>Manajemen Bukti Fisik - SpeakUp</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style>
+    .tabel-scroll {
+        max-height: calc(100vh - 420px);
+        overflow-y: auto;
+    }
+    .tabel-scroll thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: white;
+    }
+</style>
 <body class="bg-gray-50">
     <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-72 bg-indigo-900 text-white p-6 flex flex-col">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="rounded-full bg-white/10 p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+        {{-- ─── SIDEBAR ─────────────────────────────── --}}
+            <aside class="w-72 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white flex flex-col shrink-0 shadow-2xl">
+                {{-- Logo --}}
+                <div class="px-6 py-7 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="rounded-xl bg-white/10 p-2.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg leading-tight">SpeakUp</p>
+                            <p class="text-xs text-indigo-300">Admin Panel</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm uppercase tracking-wider">SpeakUp</p>
-                    <p class="text-xs text-indigo-200">Admin Panel</p>
-                </div>
-            </div>
-            <nav class="flex-1 space-y-2">     
-                <!-- Menu Manajemen Laporan -->
-                <a href="{{ route('admin.dashboard') }}" 
-                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
-                        {{ request()->routeIs('admin.dashboard') 
-                            ? 'bg-white/10' 
-                            : 'hover:bg-white/10' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    <span class="text-indigo-200">Manajemen Laporan</span>
-                </a>
 
-                <!-- Menu Bukti Fisik -->
-                <a href="{{ route('admin.bukti.index') }}" 
-                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
-                        {{ request()->routeIs('admin.bukti.*') 
-                            ? 'bg-white/10' 
-                            : 'hover:bg-white/10' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
-                    <span class="text-indigo-200">Bukti Fisik</span>
-                </a>
-
-                <!-- Menu Customer Service -->
-                <a href="{{ route('admin.chat.index') }}" 
-                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
-                        {{ request()->routeIs('admin.chat.*') 
-                            ? 'bg-white/10' 
-                            : 'hover:bg-white/10' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
-                    </svg>
-                    <span class="text-indigo-200">Customer Service</span>
-                </a>
-
-                @if(Auth::user()->role === 'super_admin')
-                <!-- Menu Kelola User -->
-                <a href="{{ route('admin.users.index') }}" 
-                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
-                        {{ request()->routeIs('admin.users.*') 
-                            ? 'bg-white/10' 
-                            : 'hover:bg-white/10' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M7 10a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span class="text-indigo-200">Kelola User</span>
-                </a>
-                @endif
-
-            </nav>
-            <div class="border-t border-white/10 pt-4">
-                <form action="{{ route('admin.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-red-600 hover:text-white transition">
+                {{-- Nav --}}
+                <nav class="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
+                    <!-- Menu Manajemen Laporan -->
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.dashboard') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        <span>Keluar</span>
-                    </button>
-                </form>
-            </div>
-        </aside>
+                        <span>Manajemen Laporan</span>
+                        @if(isset($stats['baru_hari_ini']) && $stats['baru_hari_ini'] > 0)
+                            <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full badge-new">
+                                {{ $stats['baru_hari_ini'] }}
+                            </span>
+                        @endif
+                    </a>
+
+                    <!-- Menu Bukti Fisik (dari branch kita) -->
+                    <a href="{{ route('admin.bukti.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.bukti.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span>Bukti Fisik</span>
+                    </a>
+
+                    <!-- Menu Customer Service -->
+                    <a href="{{ route('admin.chat.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.chat.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                        </svg>
+                        <span>Customer Service</span>
+                    </a>
+
+                    <!-- Menu Perbandingan Laporan (dari main) -->
+                    <a href="{{ route('admin.perbandingan-laporan') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.perbandingan-laporan') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span>Perbandingan Laporan</span>
+                    </a>
+
+                    @if(Auth::user()->role === 'super_admin')
+                    <!-- Menu Kelola User -->
+                    <a href="{{ route('admin.users.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.users.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M7 10a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Kelola User</span>
+                    </a>
+                    @endif
+                </nav>
+
+                {{-- User + Logout --}}
+                <div class="px-4 py-5 border-t border-white/10">
+                    <div class="flex items-center gap-3 mb-4 px-2">
+                        <div class="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold uppercase">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
+                            <p class="text-xs text-indigo-300 capitalize">{{ Auth::user()->role }}</p>
+                        </div>
+                    </div>
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            class="w-full flex items-center gap-3 rounded-xl px-4 py-2.5 text-indigo-200 hover:bg-red-600 hover:text-white transition font-medium text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Keluar
+                        </button>
+                    </form>
+                </div>
+            </aside>
+            </header>
 
  
         <!-- Main Content -->
@@ -171,7 +207,7 @@
                         <h2 class="text-lg font-bold text-gray-900">Daftar Bukti Fisik</h2>
                         <span class="text-sm text-gray-500">Total: <span class="font-semibold text-indigo-600">{{ $buktis->total() }}</span> item</span>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="tabel-scroll overflow-y-auto">
                         <table class="w-full">
                             <thead class="bg-gray-50 border-b border-gray-200">
                                 <tr>
@@ -303,45 +339,60 @@
         </main>
     </div>
 
-    <!-- Archive Modal -->
-    <div id="archiveModal" onclick="if (event.target.id === 'archiveModal') hideArchiveModal()" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
-        <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-            <div class="px-6 py-4 border-b flex items-center justify-between bg-gray-50">
-                <h3 class="font-semibold text-gray-900">Arsipkan Bukti Fisik</h3>
-                <button onclick="hideArchiveModal()" class="text-2xl leading-none text-gray-400 hover:text-gray-600">×</button>
+    <!-- Modal Arsip Bukti -->
+    <div id="archiveModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+        <div class="bg-white rounded-2xl w-full max-w-md mx-4 overflow-hidden">
+            
+            <!-- Header -->
+            <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="font-semibold text-lg">Arsipkan Bukti Fisik</h3>
+                <button onclick="hideArchiveModal()" class="text-2xl text-gray-400 hover:text-gray-600">×</button>
             </div>
+
             <form id="archiveForm" method="POST" class="p-6 space-y-5">
                 @csrf
-                <input type="hidden" name="_method" value="PATCH">
+                @method('PATCH')   {{-- ← INI YANG PENTING --}}
+                
+                <input type="hidden" name="id" id="archiveBuktiId">
+
                 <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1.5">Status Akhir</label>
-                    <select name="status_bukti" class="w-full rounded-xl border-gray-200 px-4 py-2.5 text-sm" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Pilih Status Akhir</label>
+                    <select name="status_bukti" class="w-full border border-gray-300 rounded-xl px-4 py-2.5" required>
                         <option value="Dikembalikan">Dikembalikan</option>
                         <option value="Dimusnahkan">Dimusnahkan</option>
                     </select>
                 </div>
+
                 <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1.5">Catatan</label>
-                    <textarea name="catatan" class="w-full rounded-xl border-gray-200 px-4 py-2.5 text-sm" rows="3" placeholder="Catatan pengarsipan..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Catatan (Opsional)</label>
+                    <textarea name="catatan" rows="3" class="w-full border border-gray-300 rounded-xl px-4 py-2.5" 
+                            placeholder="Alasan mengarsipkan bukti..."></textarea>
                 </div>
-                <div class="flex gap-3">
-                    <button type="button" onclick="hideArchiveModal()" class="flex-1 py-3 rounded-xl border text-sm font-medium hover:bg-gray-50">Batal</button>
-                    <button type="submit" class="flex-1 py-3 rounded-xl bg-orange-600 text-white text-sm font-medium hover:bg-orange-700">Arsipkan Sekarang</button>
+
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="hideArchiveModal()" 
+                            class="px-5 py-2.5 rounded-xl border text-gray-600 hover:bg-gray-100">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="px-5 py-2.5 rounded-xl bg-orange-600 text-white hover:bg-orange-700">
+                        Arsipkan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        function showArchiveModal(id) {
-            const modal = document.getElementById('archiveModal');
-            const form = document.getElementById('archiveForm');
-            form.action = '/admin/bukti/' + id + '/archive';
-            modal.style.display = 'flex';
-        }
-        function hideArchiveModal() {
-            document.getElementById('archiveModal').style.display = 'none';
-        }
-    </script>
+<script>
+    function showArchiveModal(id) {
+        document.getElementById('archiveBuktiId').value = id;
+        document.getElementById('archiveForm').action = `/admin/bukti/${id}/archive`;
+        document.getElementById('archiveModal').classList.remove('hidden');
+    }
+
+    function hideArchiveModal() {
+        document.getElementById('archiveModal').classList.add('hidden');
+    }
+</script>
 </body>
 </html>
