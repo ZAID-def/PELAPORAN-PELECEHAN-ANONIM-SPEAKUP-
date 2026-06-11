@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bukti;
+use App\Models\KategoriKejadian;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,8 @@ class ReportController extends Controller
 {
     public function create()
     {
+        $kategoris = KategoriKejadian::where('is_active', true)->orderBy('nama_kategori')->get();
+        return view('lapor', compact('kategoris'));
         return view('lapor');
     }
 
@@ -25,6 +28,9 @@ class ReportController extends Controller
         $request->validate([
             'jenis_kejadian' => 'required|string',
             'lokasi' => 'required|string|max:255',
+            'tanggal_kejadian' => 'required|date|before_or_equal:now',
+            'deskripsi' => 'required|string',
+            'phone' => 'nullable|string|max:20|regex:/^[0-9]+$/',
             'tanggal_kejadian' => 'required|date',
             'deskripsi' => 'required|string',
             'phone' => 'nullable|string|max:20',

@@ -8,6 +8,51 @@
 </head>
 <body class="bg-gray-50">
     <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-indigo-900 text-white p-6 flex flex-col">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="rounded-full bg-white/10 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm uppercase tracking-wider">SpeakUp</p>
+                    <p class="text-xs text-indigo-200">Admin Panel</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 space-y-2">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-white/10 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span>Manajemen Laporan</span>
+                </a>
+
+                @if(Auth::user()->role === 'super_admin')
+                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 text-white hover:bg-white/20 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M7 10a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 18a6 6 0 0112 0"/>
+                    </svg>
+                    <span>Kelola User</span>
+                </a>
+                @endif
+            </nav>
+
+            <div class="border-t border-white/10 pt-4">
+                <form action="{{ route('admin.logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-red-600 hover:text-white transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>Keluar</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
         {{-- ─── SIDEBAR ─────────────────────────────── --}}
             <aside class="w-72 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white flex flex-col shrink-0 shadow-2xl">
                 {{-- Logo --}}
@@ -221,6 +266,12 @@
                                                 {{ $user->email }}
                                             </td>
                                             <td class="px-8 py-4 whitespace-nowrap">
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                                    @if($user->role === 'super_admin') bg-purple-100 text-purple-800
+                                                    @else bg-blue-100 text-blue-800
+                                                    @endif">
+                                                    {{ ucfirst($user->role) }}
+                                                </span>
                                                 @if($user->id !== Auth::id())
                                                 <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
                                                     @csrf
@@ -261,4 +312,5 @@
         </main>
     </div>
 </body>
+</html>
 </html>

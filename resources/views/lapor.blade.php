@@ -39,6 +39,28 @@
 
         <!-- Form -->
         <div class="bg-white p-8 rounded-lg shadow-md">
+            @if ($errors->any())
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Data Belum Lengkap!</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <form action="{{ route('lapor.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
@@ -46,6 +68,13 @@
                     <label for="jenis_kejadian" class="block text-sm font-medium text-gray-700 mb-2">Jenis Kejadian</label>
                     <select name="jenis_kejadian" id="jenis_kejadian" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Pilih Jenis Kejadian</option>
+                        @forelse($kategoris as $kategori)
+                            <option value="{{ $kategori->nama_kategori }}" {{ old('jenis_kejadian') == $kategori->nama_kategori ? 'selected' : '' }}>
+                                {{ $kategori->nama_kategori }}
+                            </option>
+                        @empty
+                            <option value="" disabled>Belum ada kategori tersedia</option>
+                        @endforelse
                         <option value="Pelecehan Seksual">Pelecehan Seksual</option>
                         <option value="Kekerasan Fisik">Kekerasan Fisik</option>
                         <option value="Kekerasan Verbal">Kekerasan Verbal</option>
@@ -56,6 +85,7 @@
 
                 <div>
                     <label for="tanggal_kejadian" class="block text-sm font-medium text-gray-700 mb-2">Waktu Kejadian</label>
+                    <input type="datetime-local" name="tanggal_kejadian" id="tanggal_kejadian" max="{{ now()->format('Y-m-d\TH:i') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     <input type="datetime-local" name="tanggal_kejadian" id="tanggal_kejadian" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
@@ -71,11 +101,24 @@
 
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon</label>
+                    <input type="tel" name="phone" id="phone" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     <input type="tel" name="phone" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
                 <div>
                     <label for="bukti" class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-md p-4 text-center hover:border-indigo-500 transition-colors">
+                        <input type="file" name="bukti" id="bukti" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="updateFileName(this)">
+                        <label for="bukti" class="cursor-pointer">
+                            <div class="text-gray-500">
+                                <svg class="mx-auto h-12 w-12 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                <p>Klik untuk upload bukti</p>
+                                <p class="text-sm">Format: JPG, PNG, PDF. Maksimal 2MB</p>
+                            </div>
+                        </label>
+                        <div id="file-name" class="mt-2 text-sm text-indigo-600 hidden"></div>
                     <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-indigo-500 hover:bg-indigo-50/30 transition-all duration-300 relative">
                         <input type="file" name="bukti" id="bukti" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="handleFileSelect(this)">
 
@@ -141,6 +184,19 @@
     </div>
 
     <script>
+        function updateFileName(input) {
+            const fileName = document.getElementById('file-name');
+            if (input.files && input.files[0]) {
+                fileName.textContent = 'File dipilih: ' + input.files[0].name;
+                fileName.classList.remove('hidden');
+            } else {
+                fileName.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
+</body>
         const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
         const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 

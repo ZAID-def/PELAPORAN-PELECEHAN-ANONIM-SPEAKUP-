@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminReportController extends Controller
 {
+    public function dashboard()
+    {
+        $laporans = Laporan::with('buktis')->get();
+        return view('admin.dashboard', compact('laporans'));
     public function dashboard(Request $request)
     {
         $query = Laporan::with('buktis')->orderBy('tanggal_lapor', 'desc');
@@ -63,6 +67,9 @@ class AdminReportController extends Controller
 
         // Insert ke status_updates
         StatusUpdate::create([
+            'id_laporan' => $laporan->id_laporan,
+            'id_admin' => Auth::id(),
+            'status' => $request->status,
             'id_laporan'   => $laporan->id_laporan,
             'id_admin'     => Auth::id(),
             'status'       => $request->status,
@@ -75,12 +82,17 @@ class AdminReportController extends Controller
     public function destroy($id)
     {
         $laporan = Laporan::findOrFail($id);
+        
 
         // Hapus bukti terkait
         foreach ($laporan->buktis as $bukti) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($bukti->file_bukti);
             $bukti->delete();
         }
+        
+        // Hapus status updates
+        $laporan->statusUpdates()->delete();
+        
 
         // Hapus status updates
         $laporan->statusUpdates()->delete();
@@ -93,6 +105,7 @@ class AdminReportController extends Controller
 
     public function detail($id)
     {
+        $laporan = Laporan::with('buktis')->findOrFail($id);
         $laporan = Laporan::with('buktis', 'statusUpdates')->findOrFail($id);
         return response()->json($laporan);
     }

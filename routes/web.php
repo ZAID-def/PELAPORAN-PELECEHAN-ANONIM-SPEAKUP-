@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminKategoriController;
 use App\Http\Controllers\AdminBuktiController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminUserController;
@@ -11,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Redirect /login ke /admin/login agar middleware 'auth' default bisa bekerja
+Route::redirect('/login', '/admin/login')->name('login');
 
 // Routes Publik untuk Pelaporan Anonim
 Route::get('/lapor', [ReportController::class, 'create'])->name('lapor.create');
@@ -34,6 +38,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/chat/messages/{id}', [ChatController::class, 'deleteMessage'])->name('admin.chat.deleteMessage');
     Route::delete('/admin/chat/sessions/{session_id}', [ChatController::class, 'deleteSession'])->name('admin.chat.deleteSession');
     Route::patch('/admin/reports/{id}/status', [AdminReportController::class, 'updateStatus'])->name('admin.reports.updateStatus');
+    Route::delete('/admin/reports/{id}', [AdminReportController::class, 'destroy'])->name('admin.reports.destroy');
+    Route::get('/admin/reports/{id}/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
+
+    // Kategori Jenis Kejadian
+    Route::get('/admin/kategori', [AdminKategoriController::class, 'index'])->name('admin.kategori.index');
+    Route::get('/admin/kategori/create', [AdminKategoriController::class, 'create'])->name('admin.kategori.create');
+    Route::post('/admin/kategori', [AdminKategoriController::class, 'store'])->name('admin.kategori.store');
+    Route::get('/admin/kategori/{id}/edit', [AdminKategoriController::class, 'edit'])->name('admin.kategori.edit');
+    Route::put('/admin/kategori/{id}', [AdminKategoriController::class, 'update'])->name('admin.kategori.update');
+    Route::delete('/admin/kategori/{id}', [AdminKategoriController::class, 'destroy'])->name('admin.kategori.destroy');
     Route::put('/admin/reports/{id}/notes', [AdminReportController::class, 'saveNote'])->name('admin.reports.saveNote');
     Route::delete('/admin/reports/{id}/notes', [AdminReportController::class, 'deleteNote'])->name('admin.reports.deleteNote');
     Route::delete('/admin/reports/{id}', [AdminReportController::class, 'destroy'])->name('admin.reports.destroy');
@@ -62,6 +76,8 @@ Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.se
 Route::middleware('auth')->group(function () {
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index')->middleware('role:super_admin');
     Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store')->middleware('role:super_admin');
+    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy')->middleware('role:super_admin');
+});
     Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update')->middleware('role:super_admin');
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy')->middleware('role:super_admin');
 });
