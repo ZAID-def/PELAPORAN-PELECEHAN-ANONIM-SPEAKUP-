@@ -182,7 +182,7 @@
     </div>
 
     <!-- Detail Modal -->
-    <div id="detailModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div id="detailModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50" dusk="modal-detail">
         <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4">
             <div class="px-8 py-6 border-b border-gray-200 flex items-center justify-between">
                 <h3 class="text-xl font-bold text-gray-900">Detail Laporan</h3>
@@ -601,7 +601,7 @@
                                     <form action="{{ route('admin.reports.updateStatus', $laporan->id_laporan) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
-                                        <select name="status" id="status-{{ $laporan->id_laporan }}"
+<select name="status" id="status-{{ $laporan->id_laporan }}" dusk="status-select-{{ $laporan->id_laporan }}"
                                             onchange="this.form.submit()"
                                             class="text-xs font-semibold px-2.5 py-1.5 rounded-lg border cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-300
                                             @if($laporan->status == 'Menunggu Verifikasi') bg-yellow-50 border-yellow-300 text-yellow-800
@@ -621,9 +621,10 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-1">
                                         {{-- Detail --}}
-                                        <button onclick="showDetail({{ $laporan->id_laporan }})"
+<button onclick="showDetail({{ $laporan->id_laporan }})" dusk="detail-report-{{ $laporan->id_laporan }}"
                                             title="Lihat Detail"
                                             class="p-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition">
+
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -631,7 +632,7 @@
                                         </button>
 
                                         {{-- Hapus --}}
-                                        <form action="{{ route('admin.reports.destroy', $laporan->id_laporan) }}" method="POST"
+                                        <form action="{{ route('admin.reports.destroy', $laporan->id_laporan) }}" method="POST" dusk="delete-report-{{ $laporan->id_laporan }}"
                                               onsubmit="return confirm('Hapus laporan {{ $laporan->kode_tracking }}? Tindakan ini tidak dapat dibatalkan.')">
                                             @csrf
                                             @method('DELETE')
@@ -665,7 +666,7 @@
 </div>
 
 {{-- ─── MODAL DETAIL ─────────────────────────────────────────────── --}}
-<div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+<div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" dusk="modal-detail">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh]">
 
         {{-- Header modal --}}
@@ -757,16 +758,16 @@
             </div>
 
             {{-- TAB NOTES --}}
-            <div id="notes-content" class="hidden">
+    <div id="notes-content" class="hidden" dusk="modal-note">
                 {{-- Add New Note Section --}}
                 <div class="bg-slate-50 rounded-xl p-5 mb-6">
                     <p class="text-sm font-semibold text-slate-700 mb-3">Tambah Catatan Baru</p>
-                    <textarea id="detailNotesTextarea"
+<textarea id="detailNotesTextarea" dusk="notes-input"
                         rows="4"
                         class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white mb-3"
                         placeholder="Tulis catatan admin untuk penolakan/alasan..."></textarea>
                     
-                    <button onclick="saveNotes()"
+<button onclick="saveNotes()" dusk="save-notes-button"
                         class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition text-sm">
                         ✏️ Tambah Notes
                     </button>
