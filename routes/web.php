@@ -11,7 +11,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Routes Publik untuk Pelaporan Anonim
+// Redirect /login ke /admin/login agar middleware 'auth' default bisa bekerja
+Route::redirect('/login', '/admin/login')->name('login');
+
 Route::get('/lapor', [ReportController::class, 'create'])->name('lapor.create');
 Route::post('/lapor', [ReportController::class, 'store'])->name('lapor.store');
 Route::get('/lapor/sukses', [ReportController::class, 'sukses'])->name('lapor.sukses');
