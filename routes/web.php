@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AdminBuktiController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportComparisonController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -36,6 +38,21 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/reports/{id}/notes', [AdminReportController::class, 'deleteNote'])->name('admin.reports.deleteNote');
     Route::delete('/admin/reports/{id}', [AdminReportController::class, 'destroy'])->name('admin.reports.destroy');
     Route::get('/admin/reports/{id}/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
+
+    // PBI #45, #46, #47 - Manajemen Bukti Fisik (Admin)
+    Route::get('/admin/bukti', [AdminBuktiController::class, 'index'])->name('admin.bukti.index');
+    Route::get('/admin/bukti/create', [AdminBuktiController::class, 'create'])->name('admin.bukti.create');
+    Route::post('/admin/bukti', [AdminBuktiController::class, 'store'])->name('admin.bukti.store');
+    Route::get('/admin/bukti/{id}/edit', [AdminBuktiController::class, 'edit'])->name('admin.bukti.edit');
+    Route::put('/admin/bukti/{id}', [AdminBuktiController::class, 'update'])->name('admin.bukti.update');
+    Route::patch('/admin/bukti/{id}/archive', [AdminBuktiController::class, 'archive'])->name('admin.bukti.archive');
+    Route::delete('/admin/bukti/{id}', [AdminBuktiController::class, 'destroy'])->name('admin.bukti.destroy');
+
+    // PBI #48 - Hanya Super Admin
+    Route::middleware('role:super_admin')->group(function () {
+        Route::patch('/admin/bukti/{id}/archive', [AdminBuktiController::class, 'archive'])->name('admin.bukti.archive');
+        Route::delete('/admin/bukti/{id}', [AdminBuktiController::class, 'destroy'])->name('admin.bukti.destroy');
+    });
 });
 
 Route::get('/chat/messages', [ChatController::class, 'getMessages'])->name('chat.getMessages');
@@ -48,3 +65,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update')->middleware('role:super_admin');
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy')->middleware('role:super_admin');
 });
+
+
+// Routes Perbandingan Laporan (admin & super_admin)
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/perbandingan-laporan', [ReportComparisonController::class, 'index'])->name('admin.perbandingan-laporan');
+    Route::post('/admin/report-comparisons', [ReportComparisonController::class, 'store'])->name('admin.report-comparisons.store');
+    Route::get('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'show'])->name('admin.report-comparisons.show');
+    Route::put('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'update'])->name('admin.report-comparisons.update');
+    Route::delete('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'destroy'])->name('admin.report-comparisons.destroy');
+    Route::get('/admin/report-comparisons/{id}/result', [ReportComparisonController::class, 'result'])->name('admin.report-comparisons.result');
+});
+
