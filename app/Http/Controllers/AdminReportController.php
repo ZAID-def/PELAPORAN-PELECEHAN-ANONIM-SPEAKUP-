@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Laporan;
 use App\Models\StatusUpdate;
 use Illuminate\Http\Request;
+use App\Models\Bukti;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class AdminReportController extends Controller
