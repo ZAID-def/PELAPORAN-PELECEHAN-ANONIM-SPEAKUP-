@@ -158,6 +158,7 @@
                                             <th class="px-8 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama</th>
                                             <th class="px-8 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
                                             <th class="px-8 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Peran</th>
+                                            <th class="px-8 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
@@ -184,10 +185,19 @@
                                                 <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{{ ucfirst($user->role) }} (Anda)</span>
                                                 @endif
                                             </td>
+                                            <td class="px-8 py-4 whitespace-nowrap text-sm space-x-2">
+                                                @if($user->id !== Auth::id())
+                                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin hapus user ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 transition">Hapus</button>
+                                                </form>
+                                                @endif
+                                            </td>
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="3" class="px-8 py-12 text-center text-gray-500">
+                                            <td colspan="4" class="px-8 py-12 text-center text-gray-500">
                                                 Tidak ada admin terdaftar
                                             </td>
                                         </tr>
