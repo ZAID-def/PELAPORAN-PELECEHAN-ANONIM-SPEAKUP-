@@ -16,26 +16,23 @@ class AdminBuktiController extends Controller
     {
         $query = Bukti::with('laporan');
 
-        // Filter by ID Kasus (kode_tracking)
         if ($request->filled('kode_tracking')) {
             $query->whereHas('laporan', function ($q) use ($request) {
                 $q->where('kode_tracking', 'like', '%' . $request->kode_tracking . '%');
             });
         }
 
-        // Filter by Lokasi Simpan
         if ($request->filled('lokasi_simpan')) {
             $query->where('lokasi_simpan', 'like', '%' . $request->lokasi_simpan . '%');
         }
 
-        // Filter by Status
         if ($request->filled('status_bukti')) {
             $query->where('status_bukti', $request->status_bukti);
         }
 
         $buktis = $query->latest()->paginate(15)->withQueryString();
 
-        return view('admin.bukti', compact('buktis'));
+        return view('admin.bukti', compact('buktis'));   // pastikan nama view sesuai
     }
 
     /**
@@ -44,7 +41,7 @@ class AdminBuktiController extends Controller
     public function create()
     {
         $laporans = Laporan::select('id_laporan', 'kode_tracking', 'jenis_kejadian')->get();
-        return view('admin.createBukti', compact('laporans'));
+        return view('admin.bukti_fisik.create', compact('laporans'));
     }
 
     /**
@@ -97,7 +94,7 @@ class AdminBuktiController extends Controller
     {
         $bukti    = Bukti::with('laporan')->findOrFail($id);
         $laporans = Laporan::select('id_laporan', 'kode_tracking', 'jenis_kejadian')->get();
-        return view('admin.editBukti', compact('bukti', 'laporans'));
+        return view('admin.bukti_fisik.edit', compact('bukti', 'laporans'));
     }
 
     /**
@@ -128,19 +125,33 @@ class AdminBuktiController extends Controller
 
     /**
      * PBI #48 - Arsipkan bukti (ubah status menjadi Dimusnahkan/Dikembalikan)
-     * Hanya Super Admin
+     * Hanya bisa dilakukan jika kasus sudah berstatus 'Selesai'
      */
     public function archive(Request $request, $id)
     {
         $request->validate([
             'status_bukti' => 'required|in:Dimusnahkan,Dikembalikan',
-            'catatan'      => 'nullable|string',
+            'catatan'      => 'nullable|string|max:500',
         ]);
 
-        $bukti = Bukti::findOrFail($id);
+        $bukti = Bukti::with('laporan')->findOrFail($id);
+
+        // Validasi sesuai User Story PBI #48
+        if ($bukti->laporan->status !== 'Selesai') {
+            return back()->with('error', 'Bukti hanya bisa diarsipkan jika kasus sudah berstatus Selesai.');
+        }
+
+        $adminName = Auth::user()->name;
+        $tanggal   = now()->format('d/m/Y H:i');
+
+        $catatanBaru = "[$tanggal] Diarsipkan oleh {$adminName} | Status: {$request->status_bukti}\n" . 
+                    ($request->catatan ? "Alasan: {$request->catatan}" : "");
+
         $bukti->update([
             'status_bukti' => $request->status_bukti,
-            'catatan'      => $request->catatan ?? $bukti->catatan,
+            'catatan'      => $bukti->catatan 
+                ? $bukti->catatan . "\n\n" . $catatanBaru 
+                : $catatanBaru,
         ]);
 
         return redirect()->route('admin.bukti.index')
@@ -149,12 +160,18 @@ class AdminBuktiController extends Controller
 
     /**
      * PBI #48 - Hapus permanen data bukti
-     * Hanya Super Admin
+     * Hanya bisa dilakukan jika kasus sudah berstatus 'Selesai'
      */
     public function destroy($id)
     {
-        $bukti = Bukti::findOrFail($id);
+        $bukti = Bukti::with('laporan')->findOrFail($id);
 
+        // Validasi sesuai User Story PBI #48
+        if ($bukti->laporan->status !== 'Selesai') {
+            return back()->with('error', 'Bukti hanya bisa dihapus jika kasus sudah berstatus Selesai.');
+        }
+
+        // Hapus file fisik jika ada
         if ($bukti->file_bukti) {
             Storage::disk('public')->delete($bukti->file_bukti);
         }

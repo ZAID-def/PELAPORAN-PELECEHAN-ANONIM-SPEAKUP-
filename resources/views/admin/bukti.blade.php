@@ -21,34 +21,57 @@
                     <p class="text-xs text-indigo-200">Admin Panel</p>
                 </div>
             </div>
-            <nav class="flex-1 space-y-2">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-white/10 hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <nav class="flex-1 space-y-2">     
+                <!-- Menu Manajemen Laporan -->
+                <a href="{{ route('admin.dashboard') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.dashboard') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
-                    <span>Manajemen Laporan</span>
+                    <span class="text-indigo-200">Manajemen Laporan</span>
                 </a>
-                <a href="{{ route('admin.bukti.index') }}" class="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 text-white hover:bg-white/20 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                <!-- Menu Bukti Fisik -->
+                <a href="{{ route('admin.bukti.index') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.bukti.*') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
-                    <span>Bukti Fisik</span>
+                    <span class="text-indigo-200">Bukti Fisik</span>
                 </a>
-                <a href="{{ route('admin.chat.index') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-white/10 hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                <!-- Menu Customer Service -->
+                <a href="{{ route('admin.chat.index') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.chat.*') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
                     </svg>
-                    <span>Customer Service</span>
+                    <span class="text-indigo-200">Customer Service</span>
                 </a>
+
                 @if(Auth::user()->role === 'super_admin')
-                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-white/10 hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Menu Kelola User -->
+                <a href="{{ route('admin.users.index') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.users.*') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M7 10a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 18a6 6 0 0112 0"/>
                     </svg>
-                    <span>Kelola User</span>
+                    <span class="text-indigo-200">Kelola User</span>
                 </a>
                 @endif
+
             </nav>
             <div class="border-t border-white/10 pt-4">
                 <form action="{{ route('admin.logout') }}" method="POST">
@@ -62,6 +85,7 @@
                 </form>
             </div>
         </aside>
+
  
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
@@ -86,42 +110,61 @@
                 @endif
  
                 <!-- Filter & Search -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
                     <form action="{{ route('admin.bukti.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        
+                        <!-- Filter Kode Tracking -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Cari ID Kasus</label>
-                            <input type="text" name="kode_tracking" value="{{ request('kode_tracking') }}"
-                                placeholder="Contoh: SPK-20260001"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <label class="block text-xs font-medium text-gray-600 mb-1.5">Cari ID Kasus</label>
+                            <input type="text" 
+                                name="kode_tracking" 
+                                value="{{ request('kode_tracking') }}"
+                                placeholder="Contoh: SU-GXJAMB"
+                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         </div>
+
+                        <!-- Filter Lokasi Simpan -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Cari Lokasi Simpan</label>
-                            <input type="text" name="lokasi_simpan" value="{{ request('lokasi_simpan') }}"
-                                placeholder="Contoh: Ruang Arsip A"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <label class="block text-xs font-medium text-gray-600 mb-1.5">Cari Lokasi Simpan</label>
+                            <input type="text" 
+                                name="lokasi_simpan" 
+                                value="{{ request('lokasi_simpan') }}"
+                                placeholder="Contoh: ruang arsip rak 3"
+                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         </div>
+
+                        <!-- Filter Status -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Status Bukti</label>
-                            <select name="status_bukti" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <label class="block text-xs font-medium text-gray-600 mb-1.5">Status Bukti</label>
+                            <select name="status_bukti" 
+                                    class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 <option value="">Semua Status</option>
                                 @foreach(['Disimpan','Dipinjam','Dipindahkan','Dimusnahkan','Dikembalikan'] as $status)
-                                    <option value="{{ $status }}" {{ request('status_bukti') == $status ? 'selected' : '' }}>{{ $status }}</option>
+                                    <option value="{{ $status }}" 
+                                        {{ request('status_bukti') == $status ? 'selected' : '' }}>
+                                        {{ $status }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
+
+                        <!-- Tombol Aksi -->
                         <div class="flex items-end gap-2">
-                            <button type="submit" class="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                            <button type="submit" 
+                                    class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition">
                                 Cari
                             </button>
-                            @if(request()->hasAny(['kode_tracking','lokasi_simpan','status_bukti']))
-                            <a href="{{ route('admin.bukti.index') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 transition text-sm">
-                                Reset
-                            </a>
+
+                            @if(request()->hasAny(['kode_tracking', 'lokasi_simpan', 'status_bukti']))
+                                <a href="{{ route('admin.bukti.index') }}" 
+                                class="px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition">
+                                    Reset
+                                </a>
                             @endif
                         </div>
                     </form>
                 </div>
- 
+                
                 <!-- Tabel -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     <div class="border-b border-gray-200 px-8 py-5 flex items-center justify-between">
@@ -143,84 +186,109 @@
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 @forelse($buktis as $bukti)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-indigo-600">#{{ $bukti->id_bukti }}</td>
+                                <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="showBuktiDetail({{ $bukti->id_bukti }})">
+                                    <!-- ID Bukti -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-indigo-600">
+                                        #{{ $bukti->id_bukti }}
+                                    </td>
+
+                                    <!-- Nama Barang -->
                                     <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
                                         <p class="font-medium truncate">{{ $bukti->nama_barang ?? '-' }}</p>
                                         @if($bukti->file_bukti)
-                                        <p class="text-xs text-gray-400 mt-0.5">Ada file digital</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">Ada file digital</p>
                                         @endif
                                     </td>
+
+                                    <!-- ID Kasus -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <span class="font-medium text-gray-700">{{ $bukti->laporan->kode_tracking ?? '-' }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">{{ $bukti->lokasi_simpan ?? '-' }}</td>
+
+                                    <!-- Lokasi Simpan -->
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        {{ $bukti->lokasi_simpan ?? '-' }}
+                                    </td>
+
+                                    <!-- Status -->
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
                                             $statusColor = match($bukti->status_bukti) {
-                                                'Disimpan'     => 'bg-green-100 text-green-800 border-green-200',
-                                                'Dipinjam'     => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                                'Dipindahkan'  => 'bg-blue-100 text-blue-800 border-blue-200',
-                                                'Dimusnahkan'  => 'bg-red-100 text-red-800 border-red-200',
-                                                'Dikembalikan' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                                default        => 'bg-gray-100 text-gray-600 border-gray-200',
+                                                'Disimpan'     => 'bg-green-100 text-green-800',
+                                                'Dipinjam'     => 'bg-yellow-100 text-yellow-800',
+                                                'Dipindahkan'  => 'bg-blue-100 text-blue-800',
+                                                'Dimusnahkan'  => 'bg-red-100 text-red-800',
+                                                'Dikembalikan' => 'bg-gray-200 text-gray-700',
+                                                default        => 'bg-gray-100 text-gray-600',
                                             };
                                         @endphp
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusColor }}">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
                                             {{ $bukti->status_bukti ?? 'Disimpan' }}
                                         </span>
                                     </td>
+
+                                    <!-- Tanggal Masuk -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $bukti->created_at->format('d/m/Y') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <div class="flex items-center gap-2">
-                                            <!-- Edit (PBI #47) -->
-                                            <a href="{{ route('admin.bukti.edit', $bukti->id_bukti) }}"
-                                                class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit Status & Lokasi">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                            </a>
- 
 
+                                    <!-- Kolom AKSI -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <div class="flex items-center gap-2">
-                                            <!-- Edit (PBI #47) -->
+                                            <!-- Tombol Edit -->
                                             <a href="{{ route('admin.bukti.edit', $bukti->id_bukti) }}"
-                                                class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Perbarui Status & Lokasi Bukti">
+                                            class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                                            title="Edit Status & Lokasi">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                             </a>
 
-                                            @if(Auth::user()->role === 'super_admin')
-                                            <!-- Arsipkan placeholder -->
-                                            @if(!in_array($bukti->status_bukti, ['Dimusnahkan','Dikembalikan']))
-                                            <button onclick="showArchiveModal({{ $bukti->id_bukti }})"
-                                                class="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition" title="Arsipkan Bukti">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                                                </svg>
-                                            </button>
-                                            @endif
+                                            {{-- Tombol Arsip & Hapus hanya muncul jika laporan sudah Selesai --}}
+                                            @if(Auth::user()->role === 'super_admin' && $bukti->laporan->status === 'Selesai' && !in_array($bukti->status_bukti, ['Dimusnahkan','Dikembalikan']))
+                                                
+                                                <!-- Tombol Arsip -->
+                                                <button onclick="showArchiveModal({{ $bukti->id_bukti }})"
+                                                        class="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition"
+                                                        title="Arsipkan Bukti">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                                                    </svg>
+                                                </button>
+
+                                                <!-- Tombol Hapus -->
+                                                <form action="{{ route('admin.bukti.destroy', $bukti->id_bukti) }}" method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus bukti ini secara permanen?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" 
+                                                            class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
+                                                            title="Hapus Bukti Permanen">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                                d="M19 7l-.7 12.3a2 2 0 01-2 1.7H7.7a2 2 0 01-2-1.7L5 7m5 4v6m4-6v6m1-10V6a1 1 0 00-1-1h-4a1 1 0 00-1 1v1"/>
+                                                        </svg>
+                                                    </button>
+                                                </form>
                                             @endif
                                         </div>
                                     </td>
                                 </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="7" class="px-6 py-12 text-center">
-                                        <div class="flex flex-col items-center text-gray-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                            </svg>
-                                            <p class="text-sm font-medium">Belum ada data bukti fisik</p>
-                                            <p class="text-xs mt-1">Silakan tambahkan bukti baru atau sesuaikan filter.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-16 text-center">
+                                            <div class="flex flex-col items-center justify-center text-gray-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                                        d="M21 21l-6-6m2-5a7 7 0 01-14 0 7 7 0 0114 0z"/>
+                                                </svg>
+                                                <p class="text-lg font-medium text-gray-500">Data yang dicari tidak ditemukan</p>
+                                                <p class="text-sm mt-1">Coba ubah kata kunci atau reset filter pencarian.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endempty
                             </tbody>
                         </table>
                     </div>

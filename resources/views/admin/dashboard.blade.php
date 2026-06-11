@@ -22,37 +22,57 @@
                 </div>
             </div>
 
-            <nav class="flex-1 space-y-2">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 text-white hover:bg-white/20 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <nav class="flex-1 space-y-2">     
+                <!-- Menu Manajemen Laporan -->
+                <a href="{{ route('admin.dashboard') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.dashboard') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
-                    <span>Manajemen Laporan</span>
+                    <span class="text-indigo-200">Manajemen Laporan</span>
                 </a>
 
-                <a href="{{ route('admin.bukti.index') }}" class="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 text-white hover:bg-white/20 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Menu Bukti Fisik -->
+                <a href="{{ route('admin.bukti.index') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.bukti.*') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
-                    <span>Bukti Fisik</span>
+                    <span class="text-indigo-200">Bukti Fisik</span>
                 </a>
 
-                <a href="{{ route('admin.chat.index') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-white/10 hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Menu Customer Service -->
+                <a href="{{ route('admin.chat.index') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.chat.*') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
                     </svg>
-                    <span>Customer Service</span>
+                    <span class="text-indigo-200">Customer Service</span>
                 </a>
 
                 @if(Auth::user()->role === 'super_admin')
-                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-white/10 hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Menu Kelola User -->
+                <a href="{{ route('admin.users.index') }}" 
+                class="flex items-center gap-3 rounded-lg px-4 py-3 transition 
+                        {{ request()->routeIs('admin.users.*') 
+                            ? 'bg-white/10' 
+                            : 'hover:bg-white/10' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M7 10a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 18a6 6 0 0112 0"/>
                     </svg>
-                    <span>Kelola User</span>
+                    <span class="text-indigo-200">Kelola User</span>
                 </a>
                 @endif
+
             </nav>
 
             <div class="border-t border-white/10 pt-4">

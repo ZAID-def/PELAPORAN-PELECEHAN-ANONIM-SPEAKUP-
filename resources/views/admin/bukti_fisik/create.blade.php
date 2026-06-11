@@ -154,26 +154,93 @@
                             @enderror
                         </div>
 
-                        <!-- Upload File Bukti -->
+                        <!-- File Bukti Digital -->
                         <div>
-                            <label for="file_bukti" class="block text-sm font-medium text-gray-700 mb-1">
-                                File Bukti Digital <span class="text-gray-400 text-xs">(opsional)</span>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                File Bukti Digital <span class="text-gray-400">(opsional)</span>
                             </label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-indigo-400 transition cursor-pointer" onclick="document.getElementById('file_bukti').click()">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                </svg>
-                                <p class="text-sm text-gray-500" id="fileLabel">Klik untuk upload atau seret file ke sini</p>
-                                <p class="text-xs text-gray-400 mt-1">JPG, PNG, PDF, MP4, MOV — Maks. 20MB</p>
+
+                            <!-- Area Upload dengan Preview di Dalam -->
+                            <div id="uploadArea"
+                                class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-indigo-400 transition cursor-pointer bg-white">
+
+                                <!-- Default State (belum ada file) -->
+                                <div id="uploadDefault">
+                                    <div class="flex justify-center mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-medium text-indigo-600">Klik untuk upload</span> atau drag & drop
+                                    </p>
+                                    <p class="text-xs text-gray-400 mt-1">JPG, PNG, PDF, MP4, MOV — Maks. 20MB</p>
+                                </div>
+
+                                <!-- Preview State (saat ada gambar) -->
+                                <div id="uploadPreview" class="hidden flex flex-col items-center">
+                                    <img id="previewImage" class="max-h-40 rounded-lg shadow-sm border mb-3" alt="Preview">
+                                    <p id="fileName" class="text-sm font-medium text-gray-700 break-all"></p>
+                                    <button type="button" onclick="removePreview()"
+                                            class="mt-2 text-xs text-red-500 hover:text-red-600 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6h12v12"/>
+                                        </svg>
+                                        Hapus file
+                                    </button>
+                                </div>
+
+                                <input type="file" name="file_bukti" id="file_bukti" class="hidden"
+                                    accept="image/*,.pdf,.mp4,.mov">
                             </div>
-                            <input type="file" name="file_bukti" id="file_bukti" class="hidden"
-                                accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov"
-                                onchange="document.getElementById('fileLabel').textContent = this.files[0]?.name || 'Klik untuk upload'">
-                            @error('file_bukti')
-                                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                            @enderror
                         </div>
 
+                        <script>
+                            const uploadArea = document.getElementById('uploadArea');
+                            const fileInput = document.getElementById('file_bukti');
+                            const uploadDefault = document.getElementById('uploadDefault');
+                            const uploadPreview = document.getElementById('uploadPreview');
+                            const previewImage = document.getElementById('previewImage');
+                            const fileNameText = document.getElementById('fileName');
+
+                            // Klik area upload → buka file picker
+                            uploadArea.addEventListener('click', () => {
+                                fileInput.click();
+                            });
+
+                            // Saat file dipilih
+                            fileInput.addEventListener('change', function() {
+                                const file = this.files[0];
+                                if (!file) return;
+
+                                // Tampilkan preview jika gambar
+                                if (file.type.startsWith('image/')) {
+                                    const reader = new FileReader();
+                                    reader.onload = function(e) {
+                                        previewImage.src = e.target.result;
+                                        fileNameText.textContent = file.name;
+                                        uploadDefault.classList.add('hidden');
+                                        uploadPreview.classList.remove('hidden');
+                                    }
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    // Untuk non-gambar (PDF, video, dll)
+                                    fileNameText.textContent = file.name;
+                                    previewImage.src = ''; // kosongkan preview
+                                    uploadDefault.classList.add('hidden');
+                                    uploadPreview.classList.remove('hidden');
+                                }
+                            });
+
+                            // Fungsi hapus preview
+                            function removePreview() {
+                                fileInput.value = '';
+                                uploadPreview.classList.add('hidden');
+                                uploadDefault.classList.remove('hidden');
+                            }
+                        </script>
+                        
                         <!-- Catatan -->
                         <div>
                             <label for="catatan" class="block text-sm font-medium text-gray-700 mb-1">

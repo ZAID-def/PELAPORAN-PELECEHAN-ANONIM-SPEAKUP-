@@ -106,6 +106,53 @@
                                     <span class="inline-block w-2 h-2 bg-indigo-600 rounded-full"></span>
                                     PERBARUI STATUS & LOKASI (WAJIB DIISI)
                                 </h3>
+                                
+                                {{-- Tampilkan File yang Sudah Ada --}}
+                                @if($bukti->file_bukti)
+                                <div class="mb-6">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">File Saat Ini</label>
+
+                                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                                        <div class="flex flex-col md:flex-row items-start gap-4">
+                                            
+                                            {{-- Preview Gambar --}}
+                                            @if($bukti->tipe_file && str_contains($bukti->tipe_file, 'image'))
+                                                <div>
+                                                    <img src="{{ Storage::url($bukti->file_bukti) }}" 
+                                                        alt="Current File"
+                                                        class="max-h-48 rounded-xl border border-gray-200 shadow-sm object-contain"
+                                                        onerror="this.style.display='none'">
+                                                </div>
+                                            @else
+                                                {{-- Non-Image File --}}
+                                                <div class="flex items-center gap-3 p-3 bg-white border rounded-xl">
+                                                    <div class="p-3 bg-gray-100 rounded-xl">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-medium text-gray-800 break-all">
+                                                            {{ basename($bukti->file_bukti) }}
+                                                        </p>
+                                                        <p class="text-xs text-gray-500">{{ $bukti->tipe_file ?? 'Unknown' }}</p>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <div class="flex-1">
+                                                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 mb-2">
+                                                    File sudah tersimpan
+                                                </div>
+                                                <p class="text-xs text-orange-600">
+                                                    Upload file baru di bawah jika ingin mengganti file ini.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Status -->
@@ -126,6 +173,31 @@
                                             class="w-full border border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-sm"
                                             placeholder="Contoh: Ruang Arsip A - Rak 3">
                                         <p class="mt-1.5 text-xs text-gray-500">Update lokasi jika bukti dipindahkan antar ruang</p>
+                                    </div>
+                                </div>
+
+                                <!-- Ganti File Bukti (Opsional) -->
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                        Ganti File Bukti <span class="text-gray-400">(opsional)</span>
+                                    </label>
+
+                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-5 text-center hover:border-indigo-400 transition">
+                                        <input type="file" name="file_bukti" id="file_bukti" class="hidden"
+                                            accept="image/*,.pdf,.mp4,.mov">
+
+                                        <div onclick="document.getElementById('file_bukti').click()" class="cursor-pointer">
+                                            <p class="text-sm text-gray-600">
+                                                <span class="font-medium text-indigo-600">Klik untuk ganti file</span>
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, PDF, MP4, MOV — Maks 20MB</p>
+                                        </div>
+
+                                        <!-- Preview File Baru -->
+                                        <div id="newFilePreview" class="hidden mt-4 flex flex-col items-center">
+                                            <img id="newPreviewImg" class="max-h-32 rounded-lg border mb-2" alt="Preview Baru">
+                                            <p id="newFileName" class="text-sm text-gray-700 font-medium"></p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -153,6 +225,33 @@
                     <div class="mt-6 text-center">
                         <p class="text-xs text-gray-400">Perubahan status & lokasi akan tercatat secara otomatis untuk keperluan audit dan pelacakan bukti fisik.</p>
                     </div>
+                    <script>
+                        const newFileInput = document.getElementById('file_bukti');
+                        const newPreviewContainer = document.getElementById('newFilePreview');
+                        const newPreviewImg = document.getElementById('newPreviewImg');
+                        const newFileName = document.getElementById('newFileName');
+
+                        if (newFileInput) {
+                            newFileInput.addEventListener('change', function() {
+                                const file = this.files[0];
+                                if (!file) return;
+
+                                newFileName.textContent = file.name;
+
+                                if (file.type.startsWith('image/')) {
+                                    const reader = new FileReader();
+                                    reader.onload = e => {
+                                        newPreviewImg.src = e.target.result;
+                                        newPreviewContainer.classList.remove('hidden');
+                                    };
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    newPreviewImg.src = '';
+                                    newPreviewContainer.classList.remove('hidden');
+                                }
+                            });
+                        }
+                    </script>
                 </div>
             </div>
         </main>

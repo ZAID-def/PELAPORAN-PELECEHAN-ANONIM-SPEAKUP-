@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Bukti extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'buktis';
     protected $primaryKey = 'id_bukti';
@@ -22,9 +23,10 @@ class Bukti extends Model
         'catatan',
     ];
 
-    /**
-     * Relasi ke Laporan
-     */
+    protected $casts = [
+        'deleted_at' => 'datetime',
+    ];
+
     public function laporan()
     {
         return $this->belongsTo(Laporan::class, 'id_laporan');

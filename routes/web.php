@@ -44,6 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/bukti/{id}', [AdminBuktiController::class, 'update'])->name('admin.bukti.update');
     Route::patch('/admin/bukti/{id}/archive', [AdminBuktiController::class, 'archive'])->name('admin.bukti.archive');
     Route::delete('/admin/bukti/{id}', [AdminBuktiController::class, 'destroy'])->name('admin.bukti.destroy');
+
+    // PBI #48 - Hanya Super Admin
+    Route::middleware('role:super_admin')->group(function () {
+        Route::patch('/admin/bukti/{id}/archive', [AdminBuktiController::class, 'archive'])->name('admin.bukti.archive');
+        Route::delete('/admin/bukti/{id}', [AdminBuktiController::class, 'destroy'])->name('admin.bukti.destroy');
+    });
 });
 
 Route::get('/chat/messages', [ChatController::class, 'getMessages'])->name('chat.getMessages');
