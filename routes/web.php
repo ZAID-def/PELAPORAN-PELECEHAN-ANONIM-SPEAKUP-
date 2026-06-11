@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/chat/messages/{id}', [ChatController::class, 'deleteMessage'])->name('admin.chat.deleteMessage');
     Route::delete('/admin/chat/sessions/{session_id}', [ChatController::class, 'deleteSession'])->name('admin.chat.deleteSession');
     Route::patch('/admin/reports/{id}/status', [AdminReportController::class, 'updateStatus'])->name('admin.reports.updateStatus');
+    Route::put('/admin/reports/{id}/notes', [AdminReportController::class, 'saveNote'])->name('admin.reports.saveNote');
+    Route::delete('/admin/reports/{id}/notes', [AdminReportController::class, 'deleteNote'])->name('admin.reports.deleteNote');
     Route::delete('/admin/reports/{id}', [AdminReportController::class, 'destroy'])->name('admin.reports.destroy');
     Route::get('/admin/reports/{id}/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
 
@@ -60,8 +62,10 @@ Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.se
 Route::middleware('auth')->group(function () {
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index')->middleware('role:super_admin');
     Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store')->middleware('role:super_admin');
+    Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update')->middleware('role:super_admin');
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy')->middleware('role:super_admin');
 });
+
 
 // Routes Perbandingan Laporan (admin & super_admin)
 Route::middleware('auth')->group(function () {
@@ -72,3 +76,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'destroy'])->name('admin.report-comparisons.destroy');
     Route::get('/admin/report-comparisons/{id}/result', [ReportComparisonController::class, 'result'])->name('admin.report-comparisons.result');
 });
+

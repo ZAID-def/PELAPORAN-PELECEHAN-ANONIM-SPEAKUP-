@@ -221,12 +221,18 @@
                                                 {{ $user->email }}
                                             </td>
                                             <td class="px-8 py-4 whitespace-nowrap">
-                                                <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                                    @if($user->role === 'super_admin') bg-purple-100 text-purple-800
-                                                    @else bg-blue-100 text-blue-800
-                                                    @endif">
-                                                    {{ ucfirst($user->role) }}
-                                                </span>
+                                                @if($user->id !== Auth::id())
+                                                <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <select name="role" onchange="this.form.submit()" class="text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer">
+                                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                        <option value="super_admin" {{ $user->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                                    </select>
+                                                </form>
+                                                @else
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{{ ucfirst($user->role) }} (Anda)</span>
+                                                @endif
                                             </td>
                                             <td class="px-8 py-4 whitespace-nowrap text-sm space-x-2">
                                                 @if($user->id !== Auth::id())
