@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportComparisonController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -60,4 +61,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index')->middleware('role:super_admin');
     Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store')->middleware('role:super_admin');
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy')->middleware('role:super_admin');
+});
+
+// Routes Perbandingan Laporan (admin & super_admin)
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/perbandingan-laporan', [ReportComparisonController::class, 'index'])->name('admin.perbandingan-laporan');
+    Route::post('/admin/report-comparisons', [ReportComparisonController::class, 'store'])->name('admin.report-comparisons.store');
+    Route::get('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'show'])->name('admin.report-comparisons.show');
+    Route::put('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'update'])->name('admin.report-comparisons.update');
+    Route::delete('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'destroy'])->name('admin.report-comparisons.destroy');
+    Route::get('/admin/report-comparisons/{id}/result', [ReportComparisonController::class, 'result'])->name('admin.report-comparisons.result');
 });
