@@ -22,6 +22,7 @@ class Laporan extends Model
         'status',
         'tanggal_lapor',
         'kode_tracking',
+        'notes',
     ];
 
     protected $casts = [

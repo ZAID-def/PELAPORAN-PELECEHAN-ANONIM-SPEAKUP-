@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Admin - SpeakUp</title>
     <meta name="description" content="Panel admin SpeakUp untuk mengelola laporan pelecehan dan diskriminasi.">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -382,7 +383,7 @@
 
 {{-- ─── MODAL DETAIL ─────────────────────────────────────────────── --}}
 <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh]">
 
         {{-- Header modal --}}
         <div class="px-7 py-5 border-b border-slate-200 flex items-center justify-between shrink-0">
@@ -404,55 +405,103 @@
             </button>
         </div>
 
+        {{-- Tab Navigation --}}
+        <div class="flex gap-8 px-7 pt-5 border-b border-slate-200 shrink-0">
+            <button onclick="switchDetailTab('detail')" 
+                class="pb-3 px-1 font-semibold text-slate-600 border-b-2 border-transparent hover:text-slate-900 transition" 
+                id="tab-detail-btn">
+                📋 Detail
+            </button>
+            <button onclick="switchDetailTab('notes')" 
+                class="pb-3 px-1 font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-600 transition" 
+                id="tab-notes-btn">
+                📝 Notes
+            </button>
+        </div>
+
         {{-- Body modal --}}
-        <div class="flex-1 overflow-y-auto px-7 py-6 space-y-5">
-
-            {{-- Status + tanggal --}}
-            <div class="flex flex-wrap gap-4">
-                <div class="flex-1 bg-slate-50 rounded-xl p-4">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Status</p>
-                    <p id="detailStatus"></p>
+        <div class="flex-1 overflow-y-auto px-7 py-6">
+            
+            {{-- TAB DETAIL --}}
+            <div id="detail-content" class="space-y-5">
+                {{-- Status + tanggal --}}
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Status</p>
+                        <p id="detailStatus"></p>
+                    </div>
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal Lapor</p>
+                        <p id="detailTanggalLapor" class="font-medium text-slate-800"></p>
+                    </div>
                 </div>
-                <div class="flex-1 bg-slate-50 rounded-xl p-4">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal Lapor</p>
-                    <p id="detailTanggalLapor" class="font-medium text-slate-800"></p>
+
+                {{-- Jenis + Lokasi --}}
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Jenis Kejadian</p>
+                        <p id="detailJenis" class="font-semibold text-slate-800"></p>
+                    </div>
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Lokasi</p>
+                        <p id="detailLokasi" class="font-medium text-slate-800"></p>
+                    </div>
+                </div>
+
+                {{-- Waktu kejadian --}}
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Waktu Kejadian</p>
+                    <p id="detailTanggal" class="font-medium text-slate-800"></p>
+                </div>
+
+                {{-- Deskripsi --}}
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Deskripsi</p>
+                    <p id="detailDeskripsi" class="text-slate-700 leading-relaxed whitespace-pre-wrap"></p>
+                </div>
+
+                {{-- No Telp --}}
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nomor Telepon</p>
+                    <p id="detailPhone" class="font-medium text-slate-800"></p>
+                </div>
+
+                {{-- Bukti --}}
+                <div id="detailBuktiSection" class="hidden">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Bukti Terlampir</p>
+                    <div id="buktiContainer" class="grid grid-cols-2 gap-3"></div>
                 </div>
             </div>
 
-            {{-- Jenis + Lokasi --}}
-            <div class="flex flex-wrap gap-4">
-                <div class="flex-1 bg-slate-50 rounded-xl p-4">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Jenis Kejadian</p>
-                    <p id="detailJenis" class="font-semibold text-slate-800"></p>
+            {{-- TAB NOTES --}}
+            <div id="notes-content" class="hidden">
+                {{-- Add New Note Section --}}
+                <div class="bg-slate-50 rounded-xl p-5 mb-6">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Tambah Catatan Baru</p>
+                    <textarea id="detailNotesTextarea"
+                        rows="4"
+                        class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white mb-3"
+                        placeholder="Tulis catatan admin untuk penolakan/alasan..."></textarea>
+                    
+                    <button onclick="saveNotes()"
+                        class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition text-sm">
+                        ✏️ Tambah Notes
+                    </button>
                 </div>
-                <div class="flex-1 bg-slate-50 rounded-xl p-4">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Lokasi</p>
-                    <p id="detailLokasi" class="font-medium text-slate-800"></p>
+
+                {{-- Notes List --}}
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-semibold text-slate-800">Daftar Catatan</h4>
+                        <span class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-medium">
+                            <span id="notesCount">0</span> catatan
+                        </span>
+                    </div>
+
+                    <div id="notesList" class="space-y-3">
+                        {{-- Notes akan di-render oleh JS --}}
+                    </div>
                 </div>
-            </div>
-
-            {{-- Waktu kejadian --}}
-            <div class="bg-slate-50 rounded-xl p-4">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Waktu Kejadian</p>
-                <p id="detailTanggal" class="font-medium text-slate-800"></p>
-            </div>
-
-            {{-- Deskripsi --}}
-            <div class="bg-slate-50 rounded-xl p-4">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Deskripsi</p>
-                <p id="detailDeskripsi" class="text-slate-700 leading-relaxed whitespace-pre-wrap"></p>
-            </div>
-
-            {{-- No Telp --}}
-            <div class="bg-slate-50 rounded-xl p-4">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nomor Telepon</p>
-                <p id="detailPhone" class="font-medium text-slate-800"></p>
-            </div>
-
-            {{-- Bukti --}}
-            <div id="detailBuktiSection" class="hidden">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Bukti Terlampir</p>
-                <div id="buktiContainer" class="grid grid-cols-2 gap-3"></div>
             </div>
         </div>
 
@@ -467,7 +516,84 @@
 </div>
 
 <script>
+    let currentReportId = null;
+    let currentNotes = [];
+
+    function switchDetailTab(tab) {
+        // Hide all tabs
+        document.getElementById('detail-content').classList.add('hidden');
+        document.getElementById('notes-content').classList.add('hidden');
+        
+        // Remove active state from all tabs
+        document.getElementById('tab-detail-btn').classList.remove('border-b-indigo-600', 'text-indigo-600', 'text-slate-900');
+        document.getElementById('tab-detail-btn').classList.add('text-slate-600');
+        document.getElementById('tab-notes-btn').classList.remove('border-b-indigo-600', 'text-indigo-600', 'text-slate-900');
+        document.getElementById('tab-notes-btn').classList.add('text-slate-400');
+        
+        // Show selected tab
+        if (tab === 'detail') {
+            document.getElementById('detail-content').classList.remove('hidden');
+            document.getElementById('tab-detail-btn').classList.remove('text-slate-600');
+            document.getElementById('tab-detail-btn').classList.add('border-b-2', 'border-b-indigo-600', 'text-slate-900');
+        } else {
+            document.getElementById('notes-content').classList.remove('hidden');
+            document.getElementById('tab-notes-btn').classList.remove('text-slate-400');
+            document.getElementById('tab-notes-btn').classList.add('border-b-2', 'border-b-indigo-600', 'text-slate-900');
+            renderNotesList();
+        }
+    }
+
+    function renderNotesList() {
+        const notesList = document.getElementById('notesList');
+        const notesCount = document.getElementById('notesCount');
+        
+        if (!currentNotes || currentNotes.length === 0) {
+            notesList.innerHTML = '<div class="text-center py-8 text-slate-400"><p>Belum ada catatan</p></div>';
+            notesCount.textContent = '0';
+            return;
+        }
+
+        notesCount.textContent = currentNotes.length;
+        notesList.innerHTML = currentNotes.map((note, index) => `
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 hover:bg-slate-100 transition">
+                <p class="text-sm text-slate-600 mb-2">${note}</p>
+                <div class="flex gap-2 justify-end">
+                    <button onclick="editNote(${index})"
+                        title="Edit"
+                        class="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </button>
+                    <button onclick="deleteNoteItem(${index})"
+                        title="Hapus"
+                        class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function editNote(index) {
+        document.getElementById('detailNotesTextarea').value = currentNotes[index];
+        // Scroll ke input
+        document.getElementById('detailNotesTextarea').focus();
+        document.getElementById('detailNotesTextarea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteNoteItem(index) {
+        if (!confirm('Hapus catatan ini?')) return;
+        
+        currentNotes.splice(index, 1);
+        saveAllNotes();
+        renderNotesList();
+    }
+
     function showDetail(id) {
+        currentReportId = id;
         fetch(`/admin/reports/${id}/detail`)
             .then(r => r.json())
             .then(data => {
@@ -476,6 +602,10 @@
                 document.getElementById('detailLokasi').textContent    = data.lokasi;
                 document.getElementById('detailDeskripsi').textContent = data.deskripsi;
                 document.getElementById('detailPhone').textContent     = data.phone || 'Tidak disediakan';
+
+                // Parse notes - jika ada notes, split by line breaks
+                currentNotes = data.notes ? data.notes.split('\n').filter(n => n.trim()) : [];
+                document.getElementById('detailNotesTextarea').value = '';
 
                 // Tanggal kejadian
                 const tgl = data.tanggal_kejadian ? new Date(data.tanggal_kejadian) : null;
@@ -523,15 +653,106 @@
                     document.getElementById('detailBuktiSection').classList.add('hidden');
                 }
 
+                // Reset ke tab detail
+                switchDetailTab('detail');
+
                 document.getElementById('detailModal').classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             })
-            .catch(() => alert('Gagal memuat detail laporan.'));
+            .catch(err => {
+                console.error(err);
+                alert('Gagal memuat detail laporan.');
+            });
+    }
+
+    function saveNotes() {
+        const newNote = document.getElementById('detailNotesTextarea').value.trim();
+        
+        if (!newNote) {
+            alert('Catatan tidak boleh kosong');
+            return;
+        }
+
+        // Add to array
+        currentNotes.push(newNote);
+        
+        // Save all to backend
+        saveAllNotes(() => {
+            document.getElementById('detailNotesTextarea').value = '';
+            renderNotesList();
+        });
+    }
+
+    function saveAllNotes(callback) {
+        const notes = currentNotes.join('\n');
+        
+        if (!currentReportId) {
+            alert('Report ID tidak valid');
+            return;
+        }
+
+        fetch(`/admin/reports/${currentReportId}/notes`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ notes: notes })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (callback) callback();
+            } else {
+                alert('❌ Gagal menyimpan: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('❌ Gagal menyimpan catatan');
+        });
+    }
+
+    function deleteNotes() {
+        if (!currentReportId) {
+            alert('Report ID tidak valid');
+            return;
+        }
+
+        if (!confirm('Hapus semua catatan? Tindakan ini tidak dapat dibatalkan.')) {
+            return;
+        }
+
+        fetch(`/admin/reports/${currentReportId}/notes`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                currentNotes = [];
+                document.getElementById('detailNotesTextarea').value = '';
+                renderNotesList();
+            } else {
+                alert('❌ Gagal menghapus: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('❌ Gagal menghapus catatan');
+        });
     }
 
     function closeDetail() {
         document.getElementById('detailModal').classList.add('hidden');
         document.body.style.overflow = '';
+        currentReportId = null;
+        currentNotes = [];
     }
 
     document.getElementById('detailModal').addEventListener('click', function(e) {
