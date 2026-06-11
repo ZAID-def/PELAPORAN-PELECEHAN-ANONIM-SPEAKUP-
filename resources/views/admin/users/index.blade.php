@@ -66,6 +66,13 @@
                     <span>Perbandingan Laporan</span>
                 </a>
 
+                <a href="{{ route('admin.chat.index') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-indigo-200 hover:bg-white/10 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                    </svg>
+                    <span>Customer Service</span>
+                </a>
+
                 @if(Auth::user()->role === 'super_admin')
                 <!-- Menu Kelola User -->
                 <a href="{{ route('admin.users.index') }}" 
@@ -206,12 +213,18 @@
                                                 {{ $user->email }}
                                             </td>
                                             <td class="px-8 py-4 whitespace-nowrap">
-                                                <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                                    @if($user->role === 'super_admin') bg-purple-100 text-purple-800
-                                                    @else bg-blue-100 text-blue-800
-                                                    @endif">
-                                                    {{ ucfirst($user->role) }}
-                                                </span>
+                                                @if($user->id !== Auth::id())
+                                                <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <select name="role" onchange="this.form.submit()" class="text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer">
+                                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                        <option value="super_admin" {{ $user->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                                    </select>
+                                                </form>
+                                                @else
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{{ ucfirst($user->role) }} (Anda)</span>
+                                                @endif
                                             </td>
                                             <td class="px-8 py-4 whitespace-nowrap text-sm space-x-2">
                                                 @if($user->id !== Auth::id())
