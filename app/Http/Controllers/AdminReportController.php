@@ -103,10 +103,44 @@ class AdminReportController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Laporan berhasil dihapus.');
     }
 
+    public function saveNote(Request $request, $id)
+    {
+        $request->validate([
+            'notes' => 'nullable|string',
+        ]);
+
+        $laporan = Laporan::findOrFail($id);
+        $laporan->update([
+            'notes' => $request->input('notes'),
+        ]);
+
+        // Return JSON untuk AJAX, atau redirect untuk form submit
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Catatan admin berhasil disimpan.']);
+        }
+
+        return redirect()->route('admin.dashboard')->with('success', 'Catatan admin berhasil disimpan.');
+    }
+
+    public function deleteNote($id)
+    {
+        $laporan = Laporan::findOrFail($id);
+        $laporan->update(['notes' => null]);
+
+        // Return JSON untuk AJAX, atau redirect untuk form submit
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Catatan admin berhasil dihapus.']);
+        }
+
+        return redirect()->route('admin.dashboard')->with('success', 'Catatan admin berhasil dihapus.');
+    }
+
     public function detail($id)
     {
         $laporan = Laporan::with('buktis')->findOrFail($id);
         $laporan = Laporan::with('buktis', 'statusUpdates')->findOrFail($id);
+
         return response()->json($laporan);
     }
 }
+
