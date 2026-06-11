@@ -41,6 +41,21 @@ class AdminUserController extends Controller
     }
 
     /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'role' => 'required|in:admin,super_admin',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update(['role' => $request->role]);
+
+        return redirect()->route('admin.users.index')->with('success', 'Peran user berhasil diperbarui.');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)

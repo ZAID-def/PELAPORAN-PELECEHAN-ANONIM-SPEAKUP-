@@ -15,6 +15,7 @@ class ReportController extends Controller
     {
         $kategoris = KategoriKejadian::where('is_active', true)->orderBy('nama_kategori')->get();
         return view('lapor', compact('kategoris'));
+        return view('lapor');
     }
 
     public function showTrackForm()
@@ -30,6 +31,9 @@ class ReportController extends Controller
             'tanggal_kejadian' => 'required|date|before_or_equal:now',
             'deskripsi' => 'required|string',
             'phone' => 'nullable|string|max:20|regex:/^[0-9]+$/',
+            'tanggal_kejadian' => 'required|date',
+            'deskripsi' => 'required|string',
+            'phone' => 'nullable|string|max:20',
             'bukti' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 

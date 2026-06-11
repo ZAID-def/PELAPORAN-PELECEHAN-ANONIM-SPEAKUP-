@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Laporan;
 use App\Models\StatusUpdate;
 use Illuminate\Http\Request;
+use App\Models\Bukti;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class AdminReportController extends Controller
@@ -13,6 +15,44 @@ class AdminReportController extends Controller
     {
         $laporans = Laporan::with('buktis')->get();
         return view('admin.dashboard', compact('laporans'));
+    public function dashboard(Request $request)
+    {
+        $query = Laporan::with('buktis')->orderBy('tanggal_lapor', 'desc');
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter berdasarkan jenis kejadian
+        if ($request->filled('jenis')) {
+            $query->where('jenis_kejadian', $request->jenis);
+        }
+
+        // Pencarian kode tracking atau deskripsi
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_tracking', 'like', "%{$search}%")
+                  ->orWhere('jenis_kejadian', 'like', "%{$search}%")
+                  ->orWhere('lokasi', 'like', "%{$search}%");
+            });
+        }
+
+        $laporans = $query->get();
+
+        // Statistik
+        $allLaporans = Laporan::all();
+        $stats = [
+            'total'               => $allLaporans->count(),
+            'menunggu_verifikasi' => $allLaporans->where('status', 'Menunggu Verifikasi')->count(),
+            'diproses'            => $allLaporans->where('status', 'Diproses')->count(),
+            'selesai'             => $allLaporans->where('status', 'Selesai')->count(),
+            'ditolak'             => $allLaporans->where('status', 'Ditolak')->count(),
+            'baru_hari_ini'       => Laporan::whereDate('tanggal_lapor', today())->count(),
+        ];
+
+        return view('admin.dashboard', compact('laporans', 'stats'));
     }
 
     public function updateStatus(Request $request, $id)
@@ -30,6 +70,9 @@ class AdminReportController extends Controller
             'id_laporan' => $laporan->id_laporan,
             'id_admin' => Auth::id(),
             'status' => $request->status,
+            'id_laporan'   => $laporan->id_laporan,
+            'id_admin'     => Auth::id(),
+            'status'       => $request->status,
             'tanggal_update' => now(),
         ]);
 
@@ -40,6 +83,7 @@ class AdminReportController extends Controller
     {
         $laporan = Laporan::findOrFail($id);
         
+
         // Hapus bukti terkait
         foreach ($laporan->buktis as $bukti) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($bukti->file_bukti);
@@ -49,6 +93,10 @@ class AdminReportController extends Controller
         // Hapus status updates
         $laporan->statusUpdates()->delete();
         
+
+        // Hapus status updates
+        $laporan->statusUpdates()->delete();
+
         // Hapus laporan
         $laporan->delete();
 
@@ -58,6 +106,7 @@ class AdminReportController extends Controller
     public function detail($id)
     {
         $laporan = Laporan::with('buktis')->findOrFail($id);
+        $laporan = Laporan::with('buktis', 'statusUpdates')->findOrFail($id);
         return response()->json($laporan);
     }
 }

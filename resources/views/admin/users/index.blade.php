@@ -53,6 +53,107 @@
                 </form>
             </div>
         </aside>
+        {{-- ─── SIDEBAR ─────────────────────────────── --}}
+            <aside class="w-72 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white flex flex-col shrink-0 shadow-2xl">
+                {{-- Logo --}}
+                <div class="px-6 py-7 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="rounded-xl bg-white/10 p-2.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg leading-tight">SpeakUp</p>
+                            <p class="text-xs text-indigo-300">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Nav --}}
+                <nav class="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
+                    <!-- Menu Manajemen Laporan -->
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.dashboard') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span>Manajemen Laporan</span>
+                        @if(isset($stats['baru_hari_ini']) && $stats['baru_hari_ini'] > 0)
+                            <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full badge-new">
+                                {{ $stats['baru_hari_ini'] }}
+                            </span>
+                        @endif
+                    </a>
+
+                    <!-- Menu Bukti Fisik (dari branch kita) -->
+                    <a href="{{ route('admin.bukti.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.bukti.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span>Bukti Fisik</span>
+                    </a>
+
+                    <!-- Menu Customer Service -->
+                    <a href="{{ route('admin.chat.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.chat.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                        </svg>
+                        <span>Customer Service</span>
+                    </a>
+
+                    <!-- Menu Perbandingan Laporan (dari main) -->
+                    <a href="{{ route('admin.perbandingan-laporan') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.perbandingan-laporan') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span>Perbandingan Laporan</span>
+                    </a>
+
+                    @if(Auth::user()->role === 'super_admin')
+                    <!-- Menu Kelola User -->
+                    <a href="{{ route('admin.users.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.users.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M7 10a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Kelola User</span>
+                    </a>
+                    @endif
+                </nav>
+
+                {{-- User + Logout --}}
+                <div class="px-4 py-5 border-t border-white/10">
+                    <div class="flex items-center gap-3 mb-4 px-2">
+                        <div class="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold uppercase">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
+                            <p class="text-xs text-indigo-300 capitalize">{{ Auth::user()->role }}</p>
+                        </div>
+                    </div>
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            class="w-full flex items-center gap-3 rounded-xl px-4 py-2.5 text-indigo-200 hover:bg-red-600 hover:text-white transition font-medium text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Keluar
+                        </button>
+                    </form>
+                </div>
+            </aside>
+            </header>
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
@@ -171,6 +272,18 @@
                                                     @endif">
                                                     {{ ucfirst($user->role) }}
                                                 </span>
+                                                @if($user->id !== Auth::id())
+                                                <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <select name="role" onchange="this.form.submit()" class="text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer">
+                                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                        <option value="super_admin" {{ $user->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                                    </select>
+                                                </form>
+                                                @else
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{{ ucfirst($user->role) }} (Anda)</span>
+                                                @endif
                                             </td>
                                             <td class="px-8 py-4 whitespace-nowrap text-sm space-x-2">
                                                 @if($user->id !== Auth::id())
@@ -199,4 +312,5 @@
         </main>
     </div>
 </body>
+</html>
 </html>
