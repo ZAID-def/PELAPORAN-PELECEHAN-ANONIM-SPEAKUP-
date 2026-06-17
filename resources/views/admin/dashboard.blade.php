@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Dashboard Admin - SpeakUp</title>
+    <meta name="description" content="Panel admin SpeakUp untuk mengelola laporan pelecehan dan diskriminasi.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+
+        /* Animasi badge baru */
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.7; }
+        }
+        .badge-new { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+        /* Row highlight laporan baru */
+        .row-baru {
+            border-left: 4px solid #6366f1;
+            background: linear-gradient(90deg, #eef2ff 0%, #fff 60%);
+        }
+
+        /* Card stats */
+        .stat-card {
+            transition: transform .2s, box-shadow .2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.1);
+        }
+
+        /* Scroll tabel */
+        .tabel-scroll { max-height: calc(100vh - 340px); overflow-y: auto; }
+        .tabel-scroll thead th { position: sticky; top: 0; z-index: 10; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<div class="flex h-screen overflow-hidden">
+
+        {{-- ─── SIDEBAR ─────────────────────────────── --}}
+            <aside class="w-72 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white flex flex-col shrink-0 shadow-2xl">
+                {{-- Logo --}}
+                <div class="px-6 py-7 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="rounded-xl bg-white/10 p-2.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg leading-tight">SpeakUp</p>
+                            <p class="text-xs text-indigo-300">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Nav --}}
+                <nav class="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
+                    <!-- Menu Manajemen Laporan -->
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.dashboard') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span>Manajemen Laporan</span>
+                        @if(isset($stats['baru_hari_ini']) && $stats['baru_hari_ini'] > 0)
+                            <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full badge-new">
+                                {{ $stats['baru_hari_ini'] }}
+                            </span>
+                        @endif
+                    </a>
+
+                    <!--MENU KATEGORI LAPORAN -->
+                    <a href="{{ route('admin.kategori.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.kategori.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        <span>Kategori Laporan</span>
+                    </a>
+
+                    <!-- Menu Bukti Fisik (dari branch kita) -->
+                    <a href="{{ route('admin.bukti.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.bukti.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span>Bukti Fisik</span>
+                    </a>
+
+                    <!-- Menu Customer Service -->
+                    <a href="{{ route('admin.chat.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.chat.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                        </svg>
+                        <span>Customer Service</span>
+                    </a>
+
+                    <!-- Menu Perbandingan Laporan (dari main) -->
+                    <a href="{{ route('admin.perbandingan-laporan') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.perbandingan-laporan') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span>Perbandingan Laporan</span>
+                    </a>
+
+                    @if(Auth::user()->role === 'super_admin')
+                    <!-- Menu Kelola User -->
+                    <a href="{{ route('admin.users.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition 
+                                {{ request()->routeIs('admin.users.*') ? 'bg-white/15 text-white' : 'text-indigo-200 hover:bg-white/10 hover:text-white' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M7 10a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Kelola User</span>
+                    </a>
+                    @endif
+                </nav>
+
+                {{-- User + Logout --}}
+                <div class="px-4 py-5 border-t border-white/10">
+                    <div class="flex items-center gap-3 mb-4 px-2">
+                        <div class="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold uppercase">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
+                            <p class="text-xs text-indigo-300 capitalize">{{ Auth::user()->role }}</p>
+                        </div>
+                    </div>
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            class="w-full flex items-center gap-3 rounded-xl px-4 py-2.5 text-indigo-200 hover:bg-red-600 hover:text-white transition font-medium text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Keluar
+                        </button>
+                    </form>
+                </div>
+            </aside>
+            </header>
+
+        <div class="flex-1 overflow-auto p-8">
+
+            {{-- Flash Message --}}
+            @if(session('success'))
+            <div class="mb-6 flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-4 text-emerald-800" role="alert">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="font-medium">{{ session('success') }}</p>
+            </div>
+            @endif
+
+            {{-- ─── STATISTIK CARDS ─── --}}
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                {{-- Total --}}
+                <div class="stat-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm lg:col-span-1">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Laporan</p>
+                    <p class="text-4xl font-extrabold text-slate-800">{{ $stats['total'] }}</p>
+                    <div class="mt-2 flex items-center gap-1 text-indigo-600 text-xs font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Semua laporan
+                    </div>
+                </div>
+
+                {{-- Menunggu --}}
+                <div class="stat-card bg-white rounded-2xl p-5 border border-yellow-200 shadow-sm">
+                    <p class="text-xs font-semibold text-yellow-600 uppercase tracking-wider mb-2">Menunggu</p>
+                    <p class="text-4xl font-extrabold text-yellow-700">{{ $stats['menunggu_verifikasi'] }}</p>
+                    <div class="mt-2 w-full bg-yellow-100 rounded-full h-1.5">
+                        <div class="bg-yellow-400 h-1.5 rounded-full" style="width: {{ $stats['total'] > 0 ? round($stats['menunggu_verifikasi'] / $stats['total'] * 100) : 0 }}%"></div>
+                    </div>
+                </div>
+
+                {{-- Diproses --}}
+                <div class="stat-card bg-white rounded-2xl p-5 border border-blue-200 shadow-sm">
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">Diproses</p>
+                    <p class="text-4xl font-extrabold text-blue-700">{{ $stats['diproses'] }}</p>
+                    <div class="mt-2 w-full bg-blue-100 rounded-full h-1.5">
+                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ $stats['total'] > 0 ? round($stats['diproses'] / $stats['total'] * 100) : 0 }}%"></div>
+                    </div>
+                </div>
+
+                {{-- Selesai --}}
+                <div class="stat-card bg-white rounded-2xl p-5 border border-emerald-200 shadow-sm">
+                    <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-2">Selesai</p>
+                    <p class="text-4xl font-extrabold text-emerald-700">{{ $stats['selesai'] }}</p>
+                    <div class="mt-2 w-full bg-emerald-100 rounded-full h-1.5">
+                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ $stats['total'] > 0 ? round($stats['selesai'] / $stats['total'] * 100) : 0 }}%"></div>
+                    </div>
+                </div>
+
+                {{-- Ditolak --}}
+                <div class="stat-card bg-white rounded-2xl p-5 border border-red-200 shadow-sm">
+                    <p class="text-xs font-semibold text-red-500 uppercase tracking-wider mb-2">Ditolak</p>
+                    <p class="text-4xl font-extrabold text-red-600">{{ $stats['ditolak'] }}</p>
+                    <div class="mt-2 w-full bg-red-100 rounded-full h-1.5">
+                        <div class="bg-red-500 h-1.5 rounded-full" style="width: {{ $stats['total'] > 0 ? round($stats['ditolak'] / $stats['total'] * 100) : 0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ─── TABEL LAPORAN ─── --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+                {{-- Toolbar --}}
+                <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center gap-3 justify-between">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-lg font-bold text-slate-800">Daftar Laporan Masuk</h2>
+                        <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                            {{ $laporans->count() }} hasil
+                        </span>
+                    </div>
+
+                    {{-- Filter & Search --}}
+                    <form method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap items-center gap-2">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               placeholder="Cari kode / jenis / lokasi…"
+                               class="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-52">
+
+                        <select name="status" class="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                            <option value="">Semua Status</option>
+                            <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                            <option value="Diproses"            {{ request('status') == 'Diproses' ? 'selected' : '' }}>Diproses</option>
+                            <option value="Selesai"             {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                            <option value="Ditolak"             {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        </select>
+
+                        <select name="jenis" class="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                            <option value="">Semua Jenis</option>
+                            <option value="Pelecehan Seksual"  {{ request('jenis') == 'Pelecehan Seksual' ? 'selected' : '' }}>Pelecehan Seksual</option>
+                            <option value="Kekerasan Fisik"    {{ request('jenis') == 'Kekerasan Fisik' ? 'selected' : '' }}>Kekerasan Fisik</option>
+                            <option value="Kekerasan Verbal"   {{ request('jenis') == 'Kekerasan Verbal' ? 'selected' : '' }}>Kekerasan Verbal</option>
+                            <option value="Diskriminasi"       {{ request('jenis') == 'Diskriminasi' ? 'selected' : '' }}>Diskriminasi</option>
+                            <option value="Lainnya"            {{ request('jenis') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                        </select>
+
+                        <button type="submit"
+                            class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                            Filter
+                        </button>
+                        @if(request()->hasAny(['search','status','jenis']))
+                        <a href="{{ route('admin.dashboard') }}"
+                           class="text-sm text-slate-500 hover:text-slate-700 px-2 py-2 underline underline-offset-2">
+                            Reset
+                        </a>
+                        @endif
+                    </form>
+                </div>
+
+                {{-- Table --}}
+                <div class="tabel-scroll">
+                    <table class="w-full text-sm divide-y divide-slate-100">
+                        <thead class="bg-white border-b border-slate-200 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Kode Tracking
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Tanggal Lapor
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Jenis Kejadian
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Lokasi
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider w-24">
+                                    Aksi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse($laporans as $laporan)
+                            @php
+                                $isNew = $laporan->tanggal_lapor && $laporan->tanggal_lapor->isToday();
+                            @endphp
+                            <tr class="hover:bg-slate-50 transition {{ $isNew ? 'row-baru' : '' }}">
+
+                                {{-- Kode Tracking --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono font-semibold text-indigo-600">{{ $laporan->kode_tracking }}</span>
+                                        @if($isNew)
+                                            <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase">Baru</span>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                {{-- Tanggal Lapor --}}
+                                <td class="px-6 py-4 whitespace-nowrap text-slate-600">
+                                    <div>{{ $laporan->tanggal_lapor ? $laporan->tanggal_lapor->format('d M Y') : '-' }}</div>
+                                    <div class="text-xs text-slate-400">{{ $laporan->tanggal_lapor ? $laporan->tanggal_lapor->format('H:i') : '' }}</div>
+                                </td>
+
+                                {{-- Jenis --}}
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-800">
+                                    {{ $laporan->jenis_kejadian }}
+                                </td>
+
+                                {{-- Lokasi --}}
+                                <td class="px-6 py-4 text-slate-600 max-w-[180px] truncate" title="{{ $laporan->lokasi }}">
+                                    {{ $laporan->lokasi }}
+                                </td>
+
+                                {{-- Status --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <form action="{{ route('admin.reports.updateStatus', $laporan->id_laporan) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <select name="status" id="status-{{ $laporan->id_laporan }}"
+                                            onchange="this.form.submit()"
+                                            class="text-xs font-semibold px-2.5 py-1.5 rounded-lg border cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-300
+                                            @if($laporan->status == 'Menunggu Verifikasi') bg-yellow-50 border-yellow-300 text-yellow-800
+                                            @elseif($laporan->status == 'Diproses')        bg-blue-50 border-blue-300 text-blue-800
+                                            @elseif($laporan->status == 'Selesai')         bg-emerald-50 border-emerald-300 text-emerald-800
+                                            @else                                          bg-red-50 border-red-300 text-red-700
+                                            @endif">
+                                            <option value="Menunggu Verifikasi" {{ $laporan->status == 'Menunggu Verifikasi' ? 'selected' : '' }}>⏳ Menunggu Verifikasi</option>
+                                            <option value="Diproses"            {{ $laporan->status == 'Diproses' ? 'selected' : '' }}>🔄 Diproses</option>
+                                            <option value="Selesai"             {{ $laporan->status == 'Selesai' ? 'selected' : '' }}>✅ Selesai</option>
+                                            <option value="Ditolak"             {{ $laporan->status == 'Ditolak' ? 'selected' : '' }}>❌ Ditolak</option>
+                                        </select>
+                                    </form>
+                                </td>
+
+                                {{-- Aksi --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-1">
+                                        {{-- Detail --}}
+                                        <button onclick="showDetail({{ $laporan->id_laporan }})"
+                                            title="Lihat Detail"
+                                            class="p-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </button>
+
+                                        {{-- Hapus --}}
+                                        <form action="{{ route('admin.reports.destroy', $laporan->id_laporan) }}" method="POST"
+                                              onsubmit="return confirm('Hapus laporan {{ $laporan->kode_tracking }}? Tindakan ini tidak dapat dibatalkan.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" title="Hapus Laporan"
+                                                class="p-2 rounded-lg text-red-500 hover:bg-red-50 transition">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-16 text-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <p class="text-slate-500 font-medium">Tidak ada laporan ditemukan</p>
+                                    <p class="text-slate-400 text-sm mt-1">Coba ubah filter atau reset pencarian</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+{{-- ─── MODAL DETAIL ─────────────────────────────────────────────── --}}
+<div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" dusk="modal-detail">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh]">
+
+        {{-- Header modal --}}
+        <div class="px-7 py-5 border-b border-slate-200 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Detail Laporan</h3>
+                    <p id="detailKodeModal" class="text-sm font-mono text-indigo-600"></p>
+                </div>
+            </div>
+            <button onclick="closeDetail()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Tab Navigation --}}
+        <div class="flex gap-8 px-7 pt-5 border-b border-slate-200 shrink-0">
+            <button onclick="switchDetailTab('detail')" 
+                class="pb-3 px-1 font-semibold text-slate-600 border-b-2 border-transparent hover:text-slate-900 transition" 
+                id="tab-detail-btn">
+                📋 Detail
+            </button>
+            <button onclick="switchDetailTab('notes')" 
+                class="pb-3 px-1 font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-600 transition" 
+                id="tab-notes-btn">
+                📝 Notes
+            </button>
+        </div>
+
+        {{-- Body modal --}}
+        <div class="flex-1 overflow-y-auto px-7 py-6">
+            
+            {{-- TAB DETAIL --}}
+            <div id="detail-content" class="space-y-5">
+                {{-- Status + tanggal --}}
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Status</p>
+                        <p id="detailStatus"></p>
+                    </div>
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal Lapor</p>
+                        <p id="detailTanggalLapor" class="font-medium text-slate-800"></p>
+                    </div>
+                </div>
+
+                {{-- Jenis + Lokasi --}}
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Jenis Kejadian</p>
+                        <p id="detailJenis" class="font-semibold text-slate-800"></p>
+                    </div>
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Lokasi</p>
+                        <p id="detailLokasi" class="font-medium text-slate-800"></p>
+                    </div>
+                </div>
+
+                {{-- Waktu kejadian --}}
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Waktu Kejadian</p>
+                    <p id="detailTanggal" class="font-medium text-slate-800"></p>
+                </div>
+
+                {{-- Deskripsi --}}
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Deskripsi</p>
+                    <p id="detailDeskripsi" class="text-slate-700 leading-relaxed whitespace-pre-wrap"></p>
+                </div>
+
+                {{-- No Telp --}}
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nomor Telepon</p>
+                    <p id="detailPhone" class="font-medium text-slate-800"></p>
+                </div>
+
+                {{-- Bukti --}}
+                <div id="detailBuktiSection" class="hidden">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Bukti Terlampir</p>
+                    <div id="buktiContainer" class="grid grid-cols-2 gap-3"></div>
+                </div>
+            </div>
+
+            {{-- TAB NOTES --}}
+            <div id="notes-content" class="hidden">
+                <!-- Current Note Display -->
+                <div id="currentNoteSection" class="mb-6 hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold text-slate-800">Catatan Saat Ini</h4>
+                        <button onclick="deleteCurrentNote()" 
+                                class="text-xs text-red-500 hover:text-red-600 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Hapus
+                        </button>
+                    </div>
+                    <div id="currentNoteDisplay" 
+                        class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap">
+                    </div>
+                </div>
+
+                <!-- Form Tambah / Edit Note -->
+                <div class="bg-slate-50 rounded-xl p-5">
+                    <p class="text-sm font-semibold text-slate-700 mb-3" id="noteFormTitle">Tambah Catatan Baru</p>
+                    
+                    <textarea id="detailNotesTextarea" 
+                            rows="4"
+                            class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white mb-3"
+                            placeholder="Tulis catatan admin..."></textarea>
+                    
+                    <button onclick="saveNotes()" 
+                            class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                        <span id="saveButtonText">Simpan Catatan</span>
+                    </button>
+                </div>
+            </div>
+
+        {{-- Footer modal --}}
+        <div class="px-7 py-4 border-t border-slate-200 flex justify-end shrink-0">
+            <button onclick="closeDetail()"
+                class="px-5 py-2 rounded-xl bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 transition text-sm">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentLaporanId = null;
+
+    // ==================== FUNGSI UTAMA ====================
+
+    function switchDetailTab(tab) {
+        const detailContent = document.getElementById('detail-content');
+        const notesContent = document.getElementById('notes-content');
+        const detailBtn = document.getElementById('tab-detail-btn');
+        const notesBtn = document.getElementById('tab-notes-btn');
+
+        if (tab === 'detail') {
+            detailContent.classList.remove('hidden');
+            notesContent.classList.add('hidden');
+            detailBtn.classList.add('border-indigo-600', 'text-slate-900');
+            detailBtn.classList.remove('text-slate-400', 'border-transparent');
+            notesBtn.classList.remove('border-indigo-600', 'text-slate-900');
+            notesBtn.classList.add('text-slate-400', 'border-transparent');
+        } else {
+            detailContent.classList.add('hidden');
+            notesContent.classList.remove('hidden');
+            notesBtn.classList.add('border-indigo-600', 'text-slate-900');
+            notesBtn.classList.remove('text-slate-400', 'border-transparent');
+            detailBtn.classList.remove('border-indigo-600', 'text-slate-900');
+            detailBtn.classList.add('text-slate-400', 'border-transparent');
+        }
+    }
+
+    function showDetail(id) {
+        currentLaporanId = id;
+
+        fetch(`/admin/reports/${id}/detail`)
+            .then(r => r.json())
+            .then(data => {
+                // Isi data Detail
+                document.getElementById('detailKodeModal').textContent = data.kode_tracking;
+                document.getElementById('detailJenis').textContent = data.jenis_kejadian;
+                document.getElementById('detailLokasi').textContent = data.lokasi;
+                document.getElementById('detailDeskripsi').textContent = data.deskripsi;
+                document.getElementById('detailPhone').textContent = data.phone || 'Tidak disediakan';
+
+                // Tanggal
+                const tgl = data.tanggal_kejadian ? new Date(data.tanggal_kejadian) : null;
+                document.getElementById('detailTanggal').textContent = tgl ? tgl.toLocaleString('id-ID', {dateStyle:'long', timeStyle:'short'}) : '-';
+
+                const tglLapor = data.tanggal_lapor ? new Date(data.tanggal_lapor) : null;
+                document.getElementById('detailTanggalLapor').textContent = tglLapor ? tglLapor.toLocaleString('id-ID', {dateStyle:'long', timeStyle:'short'}) : '-';
+
+                // Status
+                const statusMap = {
+                    'Menunggu Verifikasi': 'bg-yellow-100 text-yellow-800',
+                    'Diproses': 'bg-blue-100 text-blue-800',
+                    'Selesai': 'bg-emerald-100 text-emerald-800',
+                    'Ditolak': 'bg-red-100 text-red-700',
+                };
+                const cls = statusMap[data.status] || 'bg-slate-100 text-slate-700';
+                document.getElementById('detailStatus').innerHTML = 
+                    `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${cls}">${data.status}</span>`;
+
+                // === NOTES SECTION ===
+                const notesTextarea = document.getElementById('detailNotesTextarea');
+                const currentNoteSection = document.getElementById('currentNoteSection');
+                const currentNoteDisplay = document.getElementById('currentNoteDisplay');
+
+                if (data.notes && data.notes.trim() !== '') {
+                    currentNoteSection.classList.remove('hidden');
+                    currentNoteDisplay.textContent = data.notes;
+                    notesTextarea.value = '';
+                    document.getElementById('noteFormTitle').textContent = 'Edit Catatan';
+                    document.getElementById('saveButtonText').textContent = 'Perbarui Catatan';
+                } else {
+                    currentNoteSection.classList.add('hidden');
+                    notesTextarea.value = '';
+                    document.getElementById('noteFormTitle').textContent = 'Tambah Catatan Baru';
+                    document.getElementById('saveButtonText').textContent = 'Simpan Catatan';
+                }
+
+                // Reset ke tab Detail
+                switchDetailTab('detail');
+
+                // === RENDER BUKTI (VERSI AMAN) ===
+                const buktiContainer = document.getElementById('buktiContainer');
+                buktiContainer.innerHTML = '';
+                let hasAnyBukti = false;
+
+                // Bukti Digital dari laporan (data baru)
+                if (data.bukti_file) {
+                    hasAnyBukti = true;
+                    document.getElementById('detailBuktiSection').classList.remove('hidden');
+
+                    const div = document.createElement('div');
+                    div.className = 'border border-indigo-200 rounded-2xl overflow-hidden bg-white shadow-sm';
+                    const fileName = data.bukti_file.split('/').pop();
+                    const isImg = data.bukti_tipe_file && data.bukti_tipe_file.startsWith('image/');
+
+                    if (isImg) {
+                        div.innerHTML = `
+                            <div class="px-3 py-1.5 bg-indigo-100 text-xs font-semibold text-indigo-700">📷 Bukti Digital Pelapor</div>
+                            <img src="/storage/${data.bukti_file}" class="w-full h-44 object-cover" onclick="window.open('/storage/${data.bukti_file}','_blank')">
+                            <div class="p-2 text-xs flex justify-between bg-white">
+                                <span class="truncate">${fileName}</span>
+                                <a href="/storage/${data.bukti_file}" target="_blank" class="text-indigo-600">Lihat</a>
+                            </div>`;
+                    } else {
+                        div.innerHTML = `
+                            <div class="p-4 flex items-center gap-3">
+                                <div>📄</div>
+                                <div class="flex-1"><div class="font-medium">${fileName}</div></div>
+                                <a href="/storage/${data.bukti_file}" target="_blank" class="px-3 py-1 bg-indigo-600 text-white text-xs rounded">Download</a>
+                            </div>`;
+                    }
+                    buktiContainer.appendChild(div);
+                }
+
+                // Bukti Fisik (data lama + manual admin)
+                if (data.buktis && data.buktis.length > 0) {
+                    hasAnyBukti = true;
+                    document.getElementById('detailBuktiSection').classList.remove('hidden');
+
+                    data.buktis.forEach(bukti => {
+                        const div = document.createElement('div');
+                        div.className = 'border rounded-2xl overflow-hidden bg-white shadow-sm';
+                        const hasFile = bukti.file_bukti && bukti.file_bukti.length > 0;
+                        const fileName = hasFile ? bukti.file_bukti.split('/').pop() : '';
+                        const isImg = hasFile && /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+
+                        let html = '';
+                        if (bukti.nama_barang) {
+                            html += `<div class="px-3 py-1 bg-emerald-50 text-xs font-semibold">🗂️ ${bukti.nama_barang}</div>`;
+                        }
+
+                        if (hasFile && isImg) {
+                            html += `<img src="/storage/${bukti.file_bukti}" class="w-full h-40 object-cover" onclick="window.open('/storage/${bukti.file_bukti}','_blank')">`;
+                        } else if (hasFile) {
+                            html += `<div class="p-3">📄 ${fileName}</div>`;
+                        }
+
+                        if (bukti.status_bukti) {
+                            html += `<div class="px-3 py-1 text-xs bg-slate-50">Status: ${bukti.status_bukti}</div>`;
+                        }
+
+                        div.innerHTML = html || `<div class="p-3 text-sm text-slate-500">Tidak ada file</div>`;
+                        buktiContainer.appendChild(div);
+                    });
+                }
+
+                if (!hasAnyBukti) {
+                    document.getElementById('detailBuktiSection').classList.add('hidden');
+                }
+
+                document.getElementById('detailModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(() => alert('Gagal memuat detail laporan.'));
+    }
+
+    function closeDetail() {
+        document.getElementById('detailModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // ==================== NOTES FUNCTIONS ====================
+
+    function saveNotes() {
+        if (!currentLaporanId) {
+            alert("ID Laporan tidak ditemukan!");
+            return;
+        }
+
+        const textarea = document.getElementById('detailNotesTextarea');
+        const notes = textarea.value.trim();
+
+        // Ambil tombol yang sedang diklik
+        const buttons = document.querySelectorAll('#notes-content button');
+        let clickedButton = null;
+        
+        // Cari tombol yang diklik (perbaikan untuk onclick)
+        buttons.forEach(btn => {
+            if (btn.innerText.includes('Perbarui') || btn.innerText.includes('Simpan')) {
+                clickedButton = btn;
+            }
+        });
+
+        const originalText = clickedButton ? clickedButton.innerHTML : '';
+
+        // Loading state
+        if (clickedButton) {
+            clickedButton.disabled = true;
+            clickedButton.innerHTML = '⏳ Menyimpan...';
+        }
+
+        fetch(`/admin/reports/${currentLaporanId}/notes`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ notes: notes })
+        })
+        .then(async response => {
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Tampilkan pesan sukses
+                const successDiv = document.createElement('div');
+                successDiv.className = 'mt-3 px-3 py-2 bg-emerald-100 text-emerald-700 text-sm rounded-lg flex items-center gap-2';
+                successDiv.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Catatan berhasil disimpan!
+                `;
+                textarea.parentNode.appendChild(successDiv);
+
+                setTimeout(() => {
+                    successDiv.remove();
+                    showDetail(currentLaporanId); // refresh modal
+                }, 1000);
+            } else {
+                alert('Gagal menyimpan catatan: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Save Notes Error:', error);
+            alert('Terjadi kesalahan: ' + error.message);
+        })
+        .finally(() => {
+            if (clickedButton) {
+                clickedButton.disabled = false;
+                clickedButton.innerHTML = originalText;
+            }
+        });
+    }
+
+    function deleteCurrentNote() {
+        if (!currentLaporanId || !confirm('Yakin ingin menghapus catatan ini?')) return;
+
+        fetch(`/admin/reports/${currentLaporanId}/notes`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Catatan berhasil dihapus!');
+                showDetail(currentLaporanId);
+            } else {
+                alert('Gagal menghapus catatan.');
+            }
+        })
+        .catch(() => alert('Terjadi kesalahan.'));
+    }
+
+    function deleteCurrentNote() {
+        if (!currentLaporanId) {
+            alert("ID Laporan tidak ditemukan!");
+            return;
+        }
+
+        if (!confirm('Yakin ingin menghapus catatan ini?')) {
+            return;
+        }
+
+        // Ambil tombol Hapus
+        const deleteBtn = event.currentTarget;
+
+        fetch(`/admin/reports/${currentLaporanId}/notes`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(async response => {
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server error: ${response.status} - ${errorText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Catatan berhasil dihapus!');
+                showDetail(currentLaporanId); // refresh modal
+            } else {
+                alert('Gagal menghapus catatan: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Delete Note Error:', error);
+            alert('Terjadi kesalahan saat menghapus catatan.\n\n' + error.message);
+        });
+    }
+
+    // ==================== EVENT LISTENERS ====================
+
+    // Klik di luar modal untuk close
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDetail();
+        }
+    });
+
+    // Keyboard ESC untuk close modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === "Escape") {
+            const modal = document.getElementById('detailModal');
+            if (!modal.classList.contains('hidden')) {
+                closeDetail();
+            }
+        }
+    });
+</script>
+</body>
+</html>

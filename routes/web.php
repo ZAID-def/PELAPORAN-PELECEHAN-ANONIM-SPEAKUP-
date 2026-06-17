@@ -1,0 +1,95 @@
+<?php
+
+use App\Http\Controllers\AdminKategoriController;
+use App\Http\Controllers\AdminBuktiController;
+use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportComparisonController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Redirect /login ke /admin/login agar middleware 'auth' default bisa bekerja
+Route::redirect('/login', '/admin/login')->name('login');
+
+// Routes Publik untuk Pelaporan Anonim
+Route::get('/lapor', [ReportController::class, 'create'])->name('lapor.create');
+Route::post('/lapor', [ReportController::class, 'store'])->name('lapor.store');
+Route::get('/lapor/sukses', [ReportController::class, 'sukses'])->name('lapor.sukses');
+Route::get('/track', [ReportController::class, 'showTrackForm'])->name('track.form');
+Route::post('/track', [ReportController::class, 'track'])->name('track');
+
+// Admin Authentication
+Route::get('/admin/login', [App\Http\Controllers\AdminAuthController::class, 'showLogin'])->name('admin.login');
+Route::post('/admin/login', [App\Http\Controllers\AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/admin/logout', [App\Http\Controllers\AdminAuthController::class, 'logout'])->name('admin.logout');
+
+// Routes Admin (dengan middleware auth)
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/dashboard', [AdminReportController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/customer-service', [ChatController::class, 'index'])->name('admin.chat.index');
+    Route::get('/admin/chat/sessions', [ChatController::class, 'sessions'])->name('admin.chat.sessions');
+    Route::get('/admin/chat/messages', [ChatController::class, 'getMessages'])->name('admin.chat.messages');
+    Route::post('/admin/chat/reply', [ChatController::class, 'adminReply'])->name('admin.chat.reply');
+    Route::delete('/admin/chat/messages/{id}', [ChatController::class, 'deleteMessage'])->name('admin.chat.deleteMessage');
+    Route::delete('/admin/chat/sessions/{session_id}', [ChatController::class, 'deleteSession'])->name('admin.chat.deleteSession');
+    Route::patch('/admin/reports/{id}/status', [AdminReportController::class, 'updateStatus'])->name('admin.reports.updateStatus');
+    Route::delete('/admin/reports/{id}', [AdminReportController::class, 'destroy'])->name('admin.reports.destroy');
+    Route::get('/admin/reports/{id}/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
+
+    // Kategori Jenis Kejadian
+    Route::get('/admin/kategori', [AdminKategoriController::class, 'index'])->name('admin.kategori.index');
+    Route::get('/admin/kategori/create', [AdminKategoriController::class, 'create'])->name('admin.kategori.create');
+    Route::post('/admin/kategori', [AdminKategoriController::class, 'store'])->name('admin.kategori.store');
+    Route::get('/admin/kategori/{id}/edit', [AdminKategoriController::class, 'edit'])->name('admin.kategori.edit');
+    Route::put('/admin/kategori/{id}', [AdminKategoriController::class, 'update'])->name('admin.kategori.update');
+    Route::delete('/admin/kategori/{id}', [AdminKategoriController::class, 'destroy'])->name('admin.kategori.destroy');
+    Route::put('/admin/reports/{id}/notes', [AdminReportController::class, 'saveNote'])->name('admin.reports.saveNote');
+    Route::delete('/admin/reports/{id}/notes', [AdminReportController::class, 'deleteNote'])->name('admin.reports.deleteNote');
+    Route::delete('/admin/reports/{id}', [AdminReportController::class, 'destroy'])->name('admin.reports.destroy');
+    Route::get('/admin/reports/{id}/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
+
+    // PBI #45, #46, #47 - Manajemen Bukti Fisik (Admin)
+    Route::get('/admin/bukti', [AdminBuktiController::class, 'index'])->name('admin.bukti.index');
+    Route::get('/admin/bukti/create', [AdminBuktiController::class, 'create'])->name('admin.bukti.create');
+    Route::post('/admin/bukti', [AdminBuktiController::class, 'store'])->name('admin.bukti.store');
+    Route::get('/admin/bukti/{id}/edit', [AdminBuktiController::class, 'edit'])->name('admin.bukti.edit');
+    Route::put('/admin/bukti/{id}', [AdminBuktiController::class, 'update'])->name('admin.bukti.update');
+    Route::patch('/admin/bukti/{id}/archive', [AdminBuktiController::class, 'archive'])->name('admin.bukti.archive');
+    Route::delete('/admin/bukti/{id}', [AdminBuktiController::class, 'destroy'])->name('admin.bukti.destroy');
+
+    // PBI #48 - Hanya Super Admin
+    Route::middleware('role:super_admin')->group(function () {
+        Route::patch('/admin/bukti/{id}/archive', [AdminBuktiController::class, 'archive'])->name('admin.bukti.archive');
+        Route::delete('/admin/bukti/{id}', [AdminBuktiController::class, 'destroy'])->name('admin.bukti.destroy');
+    });
+});
+
+Route::get('/chat/messages', [ChatController::class, 'getMessages'])->name('chat.getMessages');
+Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+
+// Routes Super Admin (hanya untuk super_admin)
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index')->middleware('role:super_admin');
+    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store')->middleware('role:super_admin');
+    Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update')->middleware('role:super_admin');
+    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy')->middleware('role:super_admin');
+});
+
+
+
+
+// Routes Perbandingan Laporan (admin & super_admin)
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/perbandingan-laporan', [ReportComparisonController::class, 'index'])->name('admin.perbandingan-laporan');
+    Route::post('/admin/report-comparisons', [ReportComparisonController::class, 'store'])->name('admin.report-comparisons.store');
+    Route::get('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'show'])->name('admin.report-comparisons.show');
+    Route::put('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'update'])->name('admin.report-comparisons.update');
+    Route::delete('/admin/report-comparisons/{id}', [ReportComparisonController::class, 'destroy'])->name('admin.report-comparisons.destroy');
+    Route::get('/admin/report-comparisons/{id}/result', [ReportComparisonController::class, 'result'])->name('admin.report-comparisons.result');
+});
+
