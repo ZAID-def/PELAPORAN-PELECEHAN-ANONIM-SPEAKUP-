@@ -27,9 +27,9 @@ class ReportController extends Controller
         $request->validate([
             'jenis_kejadian'   => 'required|string',
             'lokasi'           => 'required|string|max:255',
-            'tanggal_kejadian' => 'required|date',
+            'tanggal_kejadian' => 'required|date|before_or_equal:now',
             'deskripsi'        => 'required|string',
-            'phone'            => 'nullable|string|max:20',
+            'phone'            => 'nullable|string|max:12|regex:/^[0-9]+$/',
             'bukti'            => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 

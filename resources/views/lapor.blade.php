@@ -39,6 +39,28 @@
 
         <!-- Form -->
         <div class="bg-white p-8 rounded-lg shadow-md">
+            @if ($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Ada kesalahan pada form!</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <form action="{{ route('lapor.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
@@ -46,17 +68,23 @@
                     <label for="jenis_kejadian" class="block text-sm font-medium text-gray-700 mb-2">Jenis Kejadian</label>
                     <select name="jenis_kejadian" id="jenis_kejadian" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Pilih Jenis Kejadian</option>
-                        <option value="Pelecehan Seksual">Pelecehan Seksual</option>
-                        <option value="Kekerasan Fisik">Kekerasan Fisik</option>
-                        <option value="Kekerasan Verbal">Kekerasan Verbal</option>
-                        <option value="Diskriminasi">Diskriminasi</option>
-                        <option value="Lainnya">Lainnya</option>
+                        @foreach($kategoris as $kategori)
+                            <option value="{{ $kategori->nama_kategori }}">{{ $kategori->nama_kategori }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <div>
                     <label for="tanggal_kejadian" class="block text-sm font-medium text-gray-700 mb-2">Waktu Kejadian</label>
-                    <input type="datetime-local" name="tanggal_kejadian" id="tanggal_kejadian" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="datetime-local" name="tanggal_kejadian" id="tanggal_kejadian" max="{{ now()->timezone('Asia/Jakarta')->format('Y-m-d\TH:i') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <script>
+                        // Set max datetime-local to current local time on client side to be safe
+                        document.addEventListener("DOMContentLoaded", function() {
+                            var now = new Date();
+                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                            document.getElementById('tanggal_kejadian').max = now.toISOString().slice(0,16);
+                        });
+                    </script>
                 </div>
 
                 <div>
@@ -71,7 +99,7 @@
 
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon</label>
-                    <input type="tel" name="phone" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="tel" name="phone" id="phone" maxlength="12" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Maksimal 12 angka" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
                 <div>

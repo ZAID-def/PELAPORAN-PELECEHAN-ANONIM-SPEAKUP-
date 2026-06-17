@@ -31,7 +31,8 @@ class KategoriKejadianTest extends DuskTestCase
      */
     private function loginAsAdmin(Browser $browser): void
     {
-        $browser->visit('/admin/login')
+        $browser->resize(1920, 1080)
+                ->visit('/admin/login')
                 ->type('email', 'test@example.com')
                 ->type('password', 'password')
                 ->press('Masuk')

@@ -246,11 +246,9 @@
 
                         <select name="jenis" class="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
                             <option value="">Semua Jenis</option>
-                            <option value="Pelecehan Seksual"  {{ request('jenis') == 'Pelecehan Seksual' ? 'selected' : '' }}>Pelecehan Seksual</option>
-                            <option value="Kekerasan Fisik"    {{ request('jenis') == 'Kekerasan Fisik' ? 'selected' : '' }}>Kekerasan Fisik</option>
-                            <option value="Kekerasan Verbal"   {{ request('jenis') == 'Kekerasan Verbal' ? 'selected' : '' }}>Kekerasan Verbal</option>
-                            <option value="Diskriminasi"       {{ request('jenis') == 'Diskriminasi' ? 'selected' : '' }}>Diskriminasi</option>
-                            <option value="Lainnya"            {{ request('jenis') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                            @foreach($kategoris as $kategori)
+                                <option value="{{ $kategori->nama_kategori }}" {{ request('jenis') == $kategori->nama_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>
+                            @endforeach
                         </select>
 
                         <button type="submit"
