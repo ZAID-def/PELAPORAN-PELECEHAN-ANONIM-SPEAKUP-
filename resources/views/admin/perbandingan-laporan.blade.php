@@ -169,11 +169,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Masalah</label>
                             <select id="filterCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                                 <option value="">Semua Kategori</option>
-                                <option value="Pelecehan Seksual">Pelecehan Seksual</option>
-                                <option value="Kekerasan Fisik">Kekerasan Fisik</option>
-                                <option value="Kekerasan Verbal">Kekerasan Verbal</option>
-                                <option value="Diskriminasi">Diskriminasi</option>
-                                <option value="Lainnya">Lainnya</option>
+                                @foreach($kategoris as $kategori)
+                                    <option value="{{ $kategori->nama_kategori }}">{{ $kategori->nama_kategori }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
@@ -397,11 +395,9 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Masalah</label>
                     <select id="formCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                         <option value="">Semua Kategori</option>
-                        <option value="Pelecehan Seksual">Pelecehan Seksual</option>
-                        <option value="Kekerasan Fisik">Kekerasan Fisik</option>
-                        <option value="Kekerasan Verbal">Kekerasan Verbal</option>
-                        <option value="Diskriminasi">Diskriminasi</option>
-                        <option value="Lainnya">Lainnya</option>
+                        @foreach($kategoris as $kategori)
+                            <option value="{{ $kategori->nama_kategori }}">{{ $kategori->nama_kategori }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>

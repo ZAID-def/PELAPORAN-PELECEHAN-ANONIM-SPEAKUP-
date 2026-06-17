@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Bukti;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use App\Models\KategoriKejadian;
 
 class AdminReportController extends Controller
 {
@@ -48,7 +49,9 @@ class AdminReportController extends Controller
             'baru_hari_ini'       => Laporan::whereDate('tanggal_lapor', today())->count(),
         ];
 
-        return view('admin.dashboard', compact('laporans', 'stats'));
+        $kategoris = KategoriKejadian::where('is_active', true)->orderBy('nama_kategori')->get();
+
+        return view('admin.dashboard', compact('laporans', 'stats', 'kategoris'));
     }
 
     public function updateStatus(Request $request, $id)

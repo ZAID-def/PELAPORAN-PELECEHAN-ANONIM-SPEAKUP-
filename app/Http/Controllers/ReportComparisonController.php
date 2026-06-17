@@ -7,6 +7,7 @@ use App\Models\ReportComparison;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\KategoriKejadian;
 
 class ReportComparisonController extends Controller
 {
@@ -19,7 +20,9 @@ class ReportComparisonController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('admin.perbandingan-laporan', compact('comparisons'));
+        $kategoris = KategoriKejadian::where('is_active', true)->orderBy('nama_kategori')->get();
+
+        return view('admin.perbandingan-laporan', compact('comparisons', 'kategoris'));
     }
 
     /**
