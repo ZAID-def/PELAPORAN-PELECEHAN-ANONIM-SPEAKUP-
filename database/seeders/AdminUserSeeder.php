@@ -13,34 +13,24 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // =============================================
-        // AKUN SUPER ADMIN (Paling tinggi hak akses)
-        // =============================================
-        User::updateOrCreate(
-            ['email' => 'superadmin@speakup.test'],
+        // Create Super Admin for testing
+        User::firstOrCreate(
+            ['email' => 'superadmin@test.com'],
             [
-                'name'     => 'Super Admin SpeakUp',
-                'password' => Hash::make('password123'), // Ganti password ini!
-                'role'     => 'super_admin',
-                'email_verified_at' => now(),
+                'name' => 'Super Admin Test',
+                'password' => Hash::make('password'),
+                'role' => 'super_admin',
             ]
         );
 
-        // =============================================
-        // AKUN ADMIN BIASA (untuk testing)
-        // =============================================
-        User::updateOrCreate(
-            ['email' => 'admin@speakup.test'],
+        // Create Regular Admin for testing
+        User::firstOrCreate(
+            ['email' => 'admin@test.com'],
             [
-                'name'     => 'Admin SpeakUp',
-                'password' => Hash::make('password123'),
-                'role'     => 'admin',
-                'email_verified_at' => now(),
+                'name' => 'Admin Test',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
             ]
         );
-
-        $this->command->info('Akun Admin berhasil dibuat!');
-        $this->command->warn('Email Super Admin : superadmin@speakup.test');
-        $this->command->warn('Password          : password123');
     }
 }
