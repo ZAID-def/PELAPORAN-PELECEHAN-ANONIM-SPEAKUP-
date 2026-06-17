@@ -291,7 +291,7 @@
 
                             <div class="flex items-center justify-end gap-4 pt-4 border-t">
                                 <a href="{{ route('admin.bukti.index') }}" class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-800 transition">Batal</a>
-                                <button type="submit" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 transition text-white text-sm font-semibold rounded-2xl shadow-sm flex items-center gap-2">
+                                <button type="submit" dusk="btn-update-bukti" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 transition text-white text-sm font-semibold rounded-2xl shadow-sm flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7"/>
                                     </svg>

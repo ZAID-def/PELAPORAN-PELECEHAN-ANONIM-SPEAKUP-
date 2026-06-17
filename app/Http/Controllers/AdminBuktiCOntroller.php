@@ -77,7 +77,7 @@ class AdminBuktiController extends Controller
         Bukti::create([
             'id_laporan'    => $request->id_laporan,
             'nama_barang'   => $request->nama_barang,
-            'file_bukti'    => $filePath,
+            'file_bukti'    => $filePath ?? '',
             'tipe_file'     => $tipeFile ?? '-',
             'status_bukti'  => 'Disimpan',
             'lokasi_simpan' => $request->lokasi_simpan,

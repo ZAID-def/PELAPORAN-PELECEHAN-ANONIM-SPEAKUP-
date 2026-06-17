@@ -160,7 +160,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('admin.bukti.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+                    <form action="{{ route('admin.bukti.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" novalidate>
                         @csrf
 
                         <!-- ID Kasus -->
@@ -310,7 +310,7 @@
                         </div>
 
                         <div class="flex items-center gap-3 pt-2">
-                            <button type="submit" class="flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium">
+                            <button type="submit" dusk="btn-daftarkan-bukti" class="flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>

@@ -249,7 +249,7 @@
 
                                     <!-- ID Kasus -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="font-medium text-gray-700">{{ $bukti->laporan->kode_tracking ?? '-' }}</span>
+                                        <span class="font-medium text-gray-700">{{ $bukti->laporan?->kode_tracking ?? '-' }}</span>
                                     </td>
 
                                     <!-- Lokasi Simpan -->
@@ -293,10 +293,12 @@
                                             </a>
 
                                             {{-- Tombol Arsip & Hapus hanya muncul jika laporan sudah Selesai --}}
-                                            @if(Auth::user()->role === 'super_admin' && $bukti->laporan->status === 'Selesai' && !in_array($bukti->status_bukti, ['Dimusnahkan','Dikembalikan']))
+                                            @if(Auth::user()->role === 'super_admin' && $bukti->laporan?->status === 'Selesai' && !in_array($bukti->status_bukti, ['Dimusnahkan','Dikembalikan']))
                                                 
                                                 <!-- Tombol Arsip -->
-                                                <button onclick="showArchiveModal({{ $bukti->id_bukti }})"
+                                                <button type="button"
+                                                        dusk="btn-archive-{{ $bukti->id_bukti }}"
+                                                        onclick="showArchiveModal({{ $bukti->id_bukti }})"
                                                         class="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition"
                                                         title="Arsipkan Bukti">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -309,7 +311,8 @@
                                                 <form action="{{ route('admin.bukti.destroy', $bukti->id_bukti) }}" method="POST"
                                                     onsubmit="return confirm('Yakin ingin menghapus bukti ini secara permanen?')">
                                                     @csrf @method('DELETE')
-                                                    <button type="submit" 
+                                                    <button type="submit"
+                                                            dusk="btn-delete-{{ $bukti->id_bukti }}"
                                                             class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
                                                             title="Hapus Bukti Permanen">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
