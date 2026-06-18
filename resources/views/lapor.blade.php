@@ -33,8 +33,8 @@
         </div>
     <main class="container mx-auto px-4 py-10">
         <div class="max-w-3xl mx-auto text-center mb-10">
-            <h1 class="text-4xl font-bold text-slate-900">Lapor Anonim</h1>
-            <p class="text-lg text-slate-600 mt-3">Ruang Aman untuk Bersuara</p>
+            <h1 class="text-4xl font-bold text-white">Lapor Anonim</h1>
+            <p class="text-lg text-slate-200 mt-3">Ruang Aman untuk Bersuara</p>
         </div>
 
         <!-- Form -->
